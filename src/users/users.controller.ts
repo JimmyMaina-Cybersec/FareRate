@@ -28,13 +28,13 @@ export class UsersController {
     return this.usersService.findOne(id, user);
   }
 
-  @Patch(':id/update')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @CurrentUser() user: JwtPayload) {
     return this.usersService.update(id, updateUserDto, user);
   }
 
-  @Delete(':id/delete')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @Delete('delete/:id')
+  remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.usersService.remove(id, user);
   }
 }
