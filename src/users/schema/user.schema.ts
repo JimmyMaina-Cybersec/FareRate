@@ -23,8 +23,8 @@ export class User {
     @Prop({ required: true })
     photoURL: string
 
-    @Prop({ required: true })
-    role: 'Super User'
+    @Prop({ required: true, lowercase: true, enum: ['super user', 'admin', 'service agent', 'accountant'] })
+    role: 'super user'
         | 'admin'
         | 'service agent'
         | 'accountant'

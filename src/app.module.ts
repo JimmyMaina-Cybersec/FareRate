@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { CurrencyConversionsModule } from './currency-conversions/currency-conversions.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -11,7 +13,10 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
     }),
     MongooseModule.forRoot('mongodb+srv://wekesa350:wekesa350@farerate.pftuk3b.mongodb.net/live?retryWrites=true&w=majority'),
-    UsersModule],
+    UsersModule,
+    CurrencyConversionsModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

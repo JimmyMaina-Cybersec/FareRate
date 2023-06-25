@@ -11,7 +11,7 @@ export class JwtPayload {
   email: string;
   photoURL: string;
   role:
-    | 'Super User'
+    | 'super user'
     | 'admin'
     | 'service agent'
     | 'accountant';
