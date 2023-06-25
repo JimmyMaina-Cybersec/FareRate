@@ -23,7 +23,7 @@ export class UsersService {
     try {
 
       if (user.role == 'super user' || user.role == 'admin') {
-        const newUser = new this.userModel(createUserDto).save();
+        const newUser = new this.userModel({ ...createUserDto, createdBy: user._id, photoURL: `https://api.dicebear.com/6.x/thumbs/svg?seed=${createUserDto.idNo}` }).save();
         return newUser;
       }
 

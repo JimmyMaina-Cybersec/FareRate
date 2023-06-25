@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { CurrencyConversionsModule } from './currency-conversions/currency-conversions.module';
 import { AuthModule } from './auth/auth.module';
+import { FloatModule } from './float/float.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     CurrencyConversionsModule,
     AuthModule,
+    FloatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
