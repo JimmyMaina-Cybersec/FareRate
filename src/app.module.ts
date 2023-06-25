@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { CurrencyConversionsModule } from './currency-conversions/currency-conversions.module';
 import { AuthModule } from './auth/auth.module';
 import { FloatModule } from './float/float.module';
+import { ShopModule } from './shop/shop.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { FloatModule } from './float/float.module';
     CurrencyConversionsModule,
     AuthModule,
     FloatModule,
+    ShopModule,
   ],
   controllers: [AppController],
   providers: [AppService],
