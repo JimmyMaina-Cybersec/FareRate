@@ -1,10 +1,10 @@
-import { IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 
 export class CreateFloatDto {
     @IsString()
     readonly currency: string
 
-    @IsString()
+    @IsNumber()
     readonly initialmount: number
 
     @IsString()
