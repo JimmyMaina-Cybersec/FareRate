@@ -65,11 +65,7 @@ export class CurrencyConversionsService {
       return transaction;
     } catch (error) {
       throw new HttpException(error.message, error.status);
-
     }
-
-
-    return 'This action adds a new currencyConversion';
   }
 
   findAll(
