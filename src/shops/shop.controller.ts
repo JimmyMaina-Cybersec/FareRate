@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { ShopService } from './shop.service';
 import { CreateShopDto } from './dto/create-shop.dto';
 import { UpdateShopDto } from './dto/update-shop.dto';
@@ -9,13 +9,18 @@ import PaginationQueryType from 'src/types/paginationQuery';
 
 
 @UseGuards(JwtAuthGuard)
-@Controller('shop')
+@Controller('shops')
 export class ShopController {
   constructor(private readonly shopService: ShopService) { }
 
-  @Post()
+  @Post('create')
   create(@Body() createShopDto: CreateShopDto, @CurrentUser() user: JwtPayload) {
-    return this.shopService.create(createShopDto, user);
+    try {
+      return this.shopService.create(createShopDto, user);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+
   }
 
   @Get()
@@ -28,12 +33,12 @@ export class ShopController {
     return this.shopService.findOne(id, user);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateShopDto: UpdateShopDto, @CurrentUser() user: JwtPayload) {
     return this.shopService.update(id, updateShopDto, user);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
 
     return this.shopService.remove(id, user);

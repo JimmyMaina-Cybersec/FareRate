@@ -6,7 +6,7 @@ export type ShopDocument = HydratedDocument<Shop>
 
 @Schema({ timestamps: true })
 export class Shop {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     name: string
 
     @Prop({ required: true })

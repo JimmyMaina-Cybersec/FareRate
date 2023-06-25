@@ -7,7 +7,7 @@ import { UsersModule } from './users/users.module';
 import { CurrencyConversionsModule } from './currency-conversions/currency-conversions.module';
 import { AuthModule } from './auth/auth.module';
 import { FloatModule } from './float/float.module';
-import { ShopModule } from './shop/shop.module';
+import { ShopModule } from './shops/shop.module';
 import { TransactionRateModule } from './transaction-rate/transaction-rate.module';
 
 @Module({
