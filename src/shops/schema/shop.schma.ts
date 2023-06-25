@@ -24,13 +24,15 @@ export class Shop {
     createdBy: Types.ObjectId
 
     @Prop({
-        type: [{ currency: String, amount: Number }], default: [
-            { currency: 'USD', amount: 0 },
-            { currency: 'KES', amount: 1 },
-            { currency: 'UGX', amount: 0 },
-        ]
+        type: Map<string, number>, default:
+        {
+            USD: 0,
+            KES: 1,
+            UGX: 0
+        }
+
     })
-    rates: { currency: string, amount: number }[]
+    buyingRate: { USD: number, KES: number, UGX: number }
 
     @Prop({
         type: String, default: "KES"
