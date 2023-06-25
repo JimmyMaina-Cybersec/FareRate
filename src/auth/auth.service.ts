@@ -13,6 +13,7 @@ import { User, UserDocument } from 'src/users/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from 'src/types/jwt-payload';
+import AuthToken from 'src/types/authToken';
 
 @Injectable()
 export class AuthService {
@@ -42,7 +43,7 @@ export class AuthService {
     }
   }
 
-  async signToken(user: UserDocument) {
+  async signToken(user: UserDocument): Promise<AuthToken> {
     const payload: JwtPayload = {
       _id: user._id,
       firstName: user.firstName,

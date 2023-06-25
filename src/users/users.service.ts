@@ -1,10 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { JwtPayload } from 'src/types/jwt-payload';
+import UserType from 'src/types/user';
+import { Query as ExpressQuery } from 'express-serve-static-core';
+import PaginationQueryType from 'src/types/paginationQuery';
+
 
 @Injectable()
 export class UsersService {
@@ -29,19 +33,61 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(user: JwtPayload, query: PaginationQueryType): Promise<{
+    data: UserDocument[];
+    page: number,
+    resPerPage: number,
+    numberOfPages: number
+  }> {
+
+    const currentPage = query.page ?? 1;
+    const resPerPage = query.resPerPage ?? 20;
+    const skip = (currentPage - 1) * resPerPage;
+
+    if (user.role == 'admin' || user.role == 'super user') {
+
+      const numberOfUsers = await this.userModel.countDocuments();
+      if (numberOfUsers <= 0) {
+        throw new HttpException('No users found', HttpStatus.NOT_FOUND);
+      }
+
+      const numberOfPages = Math.ceil(numberOfUsers / resPerPage);
+
+      const users: UserDocument[] = await this.userModel.find(
+      ).select('-refreshToken -__v').limit(resPerPage).skip(skip).exec()
+      return {
+        data: users,
+        page: query.page,
+        resPerPage: query.resPerPage,
+        numberOfPages: numberOfPages
+      }
+    }
+    throw new UnauthorizedException('You are not authorized to perform this action');
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  findOne(id: string, user: JwtPayload): Promise<UserDocument> {
+
+    if (user.role == 'admin' || user.role == 'super user') {
+      return this.userModel.findById(id).select('-refreshToken -__v').exec();
+    }
+
+    throw new UnauthorizedException('You are not authorized to perform this action');
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: string, updateUserDto: UpdateUserDto, user: JwtPayload): Promise<UserDocument> {
+    if (user.role == 'admin' || user.role == 'super user') {
+      return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).select('-refreshToken -__v').exec();
+    }
+
+    throw new UnauthorizedException('You are not authorized to Update a user');
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  remove(id: string, user: JwtPayload) {
+    if (user.role == 'admin' || user.role == 'super user') {
+
+      return this.userModel.findByIdAndDelete(id).exec();
+
+    }
+    throw new UnauthorizedException('You are not authorized to delete a user');
   }
 }
