@@ -8,7 +8,7 @@ import { CurrencyConversionsModule } from './currency-conversions/currency-conve
 import { AuthModule } from './auth/auth.module';
 import { FloatModule } from './float/float.module';
 import { ShopModule } from './shops/shop.module';
-import { TransactionRateModule } from './transaction-rate/transaction-rate.module';
+// import { TransactionRateModule } from './transaction-rate/transaction-rate.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { TransactionRateModule } from './transaction-rate/transaction-rate.modul
     AuthModule,
     FloatModule,
     ShopModule,
-    TransactionRateModule,
+    // TransactionRateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

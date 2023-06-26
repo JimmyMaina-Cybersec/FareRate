@@ -58,7 +58,7 @@ export class UsersService {
       return {
         data: users,
         page: query.page,
-        resPerPage: query.resPerPage,
+        resPerPage: resPerPage,
         numberOfPages: numberOfPages
       }
     }

@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateCurrencyConversionDto } from './dto/create-currency-conversion.dto';
 import { UpdateCurrencyConversionDto } from './dto/update-currency-conversion.dto';
 import PaginationQueryType from 'src/types/paginationQuery';
@@ -68,27 +68,55 @@ export class CurrencyConversionsService {
     }
   }
 
-  findAll(
+  async findAll(
     user: JwtPayload,
     query: PaginationQueryType,
-    filters: { trasactionType?: string; createdBy?: string },
-  ) {
-    return `This action returns all currencyConversions`;
+    filters: { trasactionType?: String; createdBy?: string },
+  ): Promise<{
+    data: FloatDocument[];
+    page: number,
+    resPerPage: number,
+    numberOfPages: number
+  }> {
+    const currentPage = query.page ?? 1;
+    const resPerPage = query.resPerPage ?? 20;
+    const skip = (currentPage - 1) * resPerPage;
+
+    if (user.role == 'admin' || user.role == 'super user') {
+
+      const numberOfFloating = await this.floatModel.countDocuments();
+      if (numberOfFloating <= 0) {
+        throw new HttpException('No users found', HttpStatus.NOT_FOUND);
+      }
+
+      const numberOfPages = Math.ceil(numberOfFloating / resPerPage);
+
+      const users: FloatDocument[] = await this.floatModel.find(
+        filters,
+      ).select('-__v').limit(resPerPage).skip(skip).exec()
+      return {
+        data: users,
+        page: query.page,
+        resPerPage: query.resPerPage,
+        numberOfPages: numberOfPages
+      }
+    }
+    throw new UnauthorizedException('You are not authorized to perform this action');
   }
 
-  findOne(id: string, user: JwtPayload) {
-    return `This action returns a #${id} currencyConversion`;
-  }
+  // findOne(id: string, user: JwtPayload) {
+  //   return `This action returns a #${id} currencyConversion`;
+  // }
 
-  update(
-    id: string,
-    updateCurrencyConversionDto: UpdateCurrencyConversionDto,
-    user: JwtPayload,
-  ) {
-    return `This action updates a #${id} currencyConversion`;
-  }
+  // update(
+  //   id: string,
+  //   updateCurrencyConversionDto: UpdateCurrencyConversionDto,
+  //   user: JwtPayload,
+  // ) {
+  //   return `This action updates a #${id} currencyConversion`;
+  // }
 
-  remove(id: string, user: JwtPayload) {
-    return `This action removes a #${id} currencyConversion`;
-  }
+  // remove(id: string, user: JwtPayload) {
+  //   return `This action removes a #${id} currencyConversion`;
+  // }
 }
