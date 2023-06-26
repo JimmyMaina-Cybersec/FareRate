@@ -18,6 +18,11 @@ export class UsersController {
     return this.usersService.create(createUserDto, user);
   }
 
+  @Get('profile')
+  getProfile(@CurrentUser() user: JwtPayload) {
+    return this.usersService.profile(user);
+  }
+
   @Get()
   findAll(@CurrentUser() user: JwtPayload, @Query() query: PaginationQueryType) {
     return this.usersService.findAll(user, query);
