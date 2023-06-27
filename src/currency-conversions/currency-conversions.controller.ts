@@ -11,7 +11,7 @@ import PaginationQueryType from 'src/types/paginationQuery';
 export class CurrencyConversionsController {
   constructor(private readonly currencyConversionsService: CurrencyConversionsService) { }
 
-  @Post()
+  @Post('create')
   create(@Body() createCurrencyConversionDto: CreateCurrencyConversionDto, @CurrentUser() user: JwtPayload) {
     return this.currencyConversionsService.create(createCurrencyConversionDto, user);
   }

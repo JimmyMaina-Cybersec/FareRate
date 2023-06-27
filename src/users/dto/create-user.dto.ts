@@ -27,4 +27,8 @@ export class CreateUserDto {
     @IsNotEmpty()
     @IsString()
     readonly role: 'admin' | 'service agent' | 'accountant';
+
+    @IsNotEmpty()
+    @IsString()
+    readonly shop: string;
 }

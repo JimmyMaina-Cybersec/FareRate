@@ -20,6 +20,9 @@ export class User {
     @Prop()
     email: string
 
+    @Prop({ type: SchemaTypes.ObjectId, ref: 'Shop', default: null })
+    shop: Types.ObjectId
+
     @Prop({ required: true })
     photoURL: string
 

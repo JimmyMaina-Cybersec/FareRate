@@ -37,7 +37,7 @@ export class UsersService {
     }
   }
 
-  async findAll(user: JwtPayload, query: PaginationQueryType): Promise<{
+  async findAll(user: JwtPayload, query: PaginationQueryType, filter: { shop?: string }): Promise<{
     data: UserDocument[];
     page: number,
     resPerPage: number,
@@ -57,12 +57,14 @@ export class UsersService {
 
       const numberOfPages = Math.ceil(numberOfUsers / resPerPage);
 
-      const users: UserDocument[] = await this.userModel.find(
+      const users: UserDocument[] = await this.userModel.find({
+        ...filter
+      }
       ).select('-refreshToken -__v').limit(resPerPage).skip(skip).exec()
       return {
         data: users,
         page: query.page,
-        resPerPage: resPerPage,
+        resPerPage: resPerPage ?? 20,
         numberOfPages: numberOfPages
       }
     }

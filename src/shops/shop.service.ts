@@ -49,8 +49,8 @@ export class ShopService {
       ).select('-__v').limit(resPerPage).skip(skip).exec()
       return {
         data: shops,
-        page: query.page,
-        resPerPage: query.resPerPage,
+        page: currentPage,
+        resPerPage: resPerPage,
         numberOfPages: numberOfPages
       }
     }

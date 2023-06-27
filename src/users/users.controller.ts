@@ -24,8 +24,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query() query: PaginationQueryType) {
-    return this.usersService.findAll(user, query);
+  findAll(@CurrentUser() user: JwtPayload, @Query() query: PaginationQueryType, @Query() filter: { shop?: string }) {
+    return this.usersService.findAll(user, query, filter);
   }
 
   @Get(':id')
