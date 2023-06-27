@@ -35,6 +35,7 @@ export class CurrencyConversionsService {
       });
 
 
+
       await this.floatModel.findOneAndUpdate(
         {
           currency: createCurrencyConversionDto.initialCurrency,
@@ -44,7 +45,7 @@ export class CurrencyConversionsService {
         },
         {
           $inc: {
-            currentAmount: -createCurrencyConversionDto.initialAmount,
+            currentAmount: createCurrencyConversionDto.initialAmount,
           },
         },
         { session: transactionSession },
@@ -57,7 +58,7 @@ export class CurrencyConversionsService {
         },
         {
           $inc: {
-            currentAmount: createCurrencyConversionDto.finalAmount,
+            currentAmount: -createCurrencyConversionDto.finalAmount,
           },
         },
         { session: transactionSession },
