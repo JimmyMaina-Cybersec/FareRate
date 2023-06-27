@@ -21,4 +21,7 @@ export class CreateCurrencyConversionDto {
 
   @IsString()
   shop: string;
+
+  // @IsString()
+  // float: string;
 }

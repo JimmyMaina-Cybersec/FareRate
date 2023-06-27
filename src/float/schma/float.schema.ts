@@ -32,10 +32,10 @@ export class Float {
   closedAt: Date;
 
   @Prop({
-    required: true,
+
     type: SchemaTypes.ObjectId,
     ref: 'User',
-    immutable: true,
+    default: null,
   })
   closedBy: Types.ObjectId;
 
@@ -48,7 +48,6 @@ export class Float {
   createdBy: Types.ObjectId;
 
   @Prop({
-    required: true,
     type: SchemaTypes.ObjectId,
     ref: 'User',
     default: null,

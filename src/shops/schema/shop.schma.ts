@@ -35,6 +35,17 @@ export class Shop {
     buyingRate: { USD: number, KES: number, UGX: number }
 
     @Prop({
+        type: Map<string, number>, default:
+        {
+            USD: 0,
+            KES: 1,
+            UGX: 0
+        }
+
+    })
+    sellingRate: { USD: number, KES: number, UGX: number }
+
+    @Prop({
         type: String, default: "KES"
     })
     baseCurrency: string

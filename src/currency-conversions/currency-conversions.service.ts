@@ -4,7 +4,7 @@ import { UpdateCurrencyConversionDto } from './dto/update-currency-conversion.dt
 import PaginationQueryType from 'src/types/paginationQuery';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { CurrencyConversion } from './schema/currency-conversion.schema';
+import { CurrencyConversion, CurrencyConversionDocument } from './schema/currency-conversion.schema';
 import { Connection, Model } from 'mongoose';
 import { Float, FloatDocument } from 'src/float/schma/float.schema';
 
@@ -40,6 +40,7 @@ export class CurrencyConversionsService {
           currency: createCurrencyConversionDto.initialCurrency,
           serviceAgent: user._id,
           status: 'active',
+
         },
         {
           $inc: {
@@ -73,7 +74,7 @@ export class CurrencyConversionsService {
     query: PaginationQueryType,
     filters: { trasactionType?: String; createdBy?: string },
   ): Promise<{
-    data: FloatDocument[];
+    data: CurrencyConversionDocument[];
     page: number,
     resPerPage: number,
     numberOfPages: number
@@ -84,20 +85,20 @@ export class CurrencyConversionsService {
 
     if (user.role == 'admin' || user.role == 'super user') {
 
-      const numberOfFloating = await this.floatModel.countDocuments();
+      const numberOfFloating = await this.currencyConversionModel.countDocuments();
       if (numberOfFloating <= 0) {
         throw new HttpException('No users found', HttpStatus.NOT_FOUND);
       }
 
       const numberOfPages = Math.ceil(numberOfFloating / resPerPage);
 
-      const users: FloatDocument[] = await this.floatModel.find(
-        filters,
+      const currencyConversion: CurrencyConversionDocument[] = await this.currencyConversionModel.find(
+        { ...filters },
       ).select('-__v').limit(resPerPage).skip(skip).exec()
       return {
-        data: users,
-        page: query.page,
-        resPerPage: query.resPerPage,
+        data: currencyConversion,
+        page: currentPage,
+        resPerPage: resPerPage,
         numberOfPages: numberOfPages
       }
     }

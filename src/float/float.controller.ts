@@ -12,7 +12,7 @@ import PaginationQueryType from 'src/types/paginationQuery';
 export class FloatController {
   constructor(private readonly floatService: FloatService) { }
 
-  @Post()
+  @Post('create')
   create(@Body() createFloatDto: CreateFloatDto, @CurrentUser() user: JwtPayload) {
     return this.floatService.create(createFloatDto, user);
   }
