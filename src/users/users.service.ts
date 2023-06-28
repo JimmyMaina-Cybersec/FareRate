@@ -19,7 +19,7 @@ export class UsersService {
   ) { }
 
   profile(user: JwtPayload) {
-    return this.userModel.findById(user._id).select('-refreshToken -__v').exec();
+    return this.userModel.findById(user._id).populate('shop').select('-refreshToken -__v').exec();
 
   }
   create(createUserDto: CreateUserDto, user: JwtPayload) {
