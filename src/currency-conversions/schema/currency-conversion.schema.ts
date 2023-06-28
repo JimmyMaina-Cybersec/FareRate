@@ -20,7 +20,7 @@ export class CurrencyConversion {
   @Prop({ required: true })
   rate: number;
 
-  @Prop({ required: true })
+  @Prop({ default: null })
   transactionType: string;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Shop' })
@@ -35,7 +35,6 @@ export class CurrencyConversion {
   createdBy: Types.ObjectId;
 
   @Prop({
-    required: true,
     type: SchemaTypes.ObjectId,
     ref: 'User',
     default: null,
