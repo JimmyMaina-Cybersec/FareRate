@@ -45,7 +45,7 @@ export class CurrencyConversionsService {
         },
         {
           $inc: {
-            currentAmount: createCurrencyConversionDto.initialAmount,
+            currentAmount: -createCurrencyConversionDto.initialAmount,
           },
         },
         { session: transactionSession },
@@ -58,7 +58,7 @@ export class CurrencyConversionsService {
         },
         {
           $inc: {
-            currentAmount: -createCurrencyConversionDto.finalAmount,
+            currentAmount: createCurrencyConversionDto.finalAmount,
           },
         },
         { session: transactionSession },
@@ -86,7 +86,7 @@ export class CurrencyConversionsService {
 
     if (user.role == 'admin' || user.role == 'super user') {
 
-      const numberOfFloating = await this.currencyConversionModel.countDocuments();
+      const numberOfFloating = await this.currencyConversionModel.countDocuments({ ...filters });
       if (numberOfFloating <= 0) {
         throw new HttpException('No users found', HttpStatus.NOT_FOUND);
       }

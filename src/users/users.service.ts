@@ -50,7 +50,10 @@ export class UsersService {
 
     if (user.role == 'admin' || user.role == 'super user') {
 
-      const numberOfUsers = await this.userModel.countDocuments();
+      const numberOfUsers = await this.userModel.countDocuments({
+        ...filter
+      }
+      );
       if (numberOfUsers <= 0) {
         throw new HttpException('No users found', HttpStatus.NOT_FOUND);
       }

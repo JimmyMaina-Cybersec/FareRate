@@ -49,11 +49,11 @@ export class FloatService {
 
     if (user.role == 'admin' || user.role == 'service agent') {
       const floats = await this.floatModel.find({ ...filters }).select('-__v').limit(resPerPage).skip(skip).exec();
-      const count = await this.floatModel.countDocuments().exec();
+      const count = await this.floatModel.countDocuments({ ...filters }).exec();
       return {
         data: floats,
-        page: query.page,
-        resPerPage: query.resPerPage,
+        page: currentPage,
+        resPerPage: resPerPage,
         numberOfPages: Math.ceil(count / resPerPage)
       };
     }
