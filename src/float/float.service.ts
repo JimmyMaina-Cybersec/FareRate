@@ -20,7 +20,7 @@ export class FloatService {
   async create(createFloatDto: CreateFloatDto, user: JwtPayload): Promise<FloatDocument> {
 
     if (user.role == 'admin' || user.role == 'service agent') {
-      const exists = await this.floatModel.exists({ currency: createFloatDto.currency, status: 'active', serviceAgent: user._id })
+      const exists = await this.floatModel.exists({ currency: createFloatDto.currency, status: 'active', serviceAgent: createFloatDto.serviceAgent })
 
       if (exists) {
         throw new ConflictException('Float already exists and is active')
@@ -30,7 +30,7 @@ export class FloatService {
         ...createFloatDto,
         currentAmount: createFloatDto.initialmount,
         createdBy: user._id,
-        serviceAgent: user._id
+        serviceAgent: createFloatDto.serviceAgent
       })
     }
 
