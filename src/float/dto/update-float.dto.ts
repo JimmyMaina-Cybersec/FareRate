@@ -8,7 +8,6 @@ export class UpdateFloatDto extends PartialType(CreateFloatDto) {
     @IsNumber()
     readonly addedAmount: number
 
-    @IsString()
-    readonly updatedBy: string
+
 
 }

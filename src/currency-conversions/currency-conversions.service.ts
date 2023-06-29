@@ -27,13 +27,23 @@ export class CurrencyConversionsService {
 
     try {
 
-      const transactionSession = await this.connection.startSession();
-      transactionSession.startTransaction();
+
       const transaction = await this.currencyConversionModel.create({
         ...createCurrencyConversionDto,
         createdBy: user._id,
-      });
+      },);
 
+
+      const init = await this.floatModel.findOneAndUpdate(
+        {
+          currency: createCurrencyConversionDto.initialCurrency,
+          serviceAgent: user._id,
+          status: 'active',
+        },);
+
+      if (init.currentAmount < createCurrencyConversionDto.initialAmount) {
+        throw new HttpException('Insufficient funds', HttpStatus.BAD_REQUEST);
+      }
 
 
       await this.floatModel.findOneAndUpdate(
@@ -41,14 +51,13 @@ export class CurrencyConversionsService {
           currency: createCurrencyConversionDto.initialCurrency,
           serviceAgent: user._id,
           status: 'active',
-
         },
         {
           $inc: {
             currentAmount: -createCurrencyConversionDto.initialAmount,
           },
         },
-        { session: transactionSession },
+
       );
       await this.floatModel.findOneAndUpdate(
         {
@@ -61,9 +70,8 @@ export class CurrencyConversionsService {
             currentAmount: createCurrencyConversionDto.finalAmount,
           },
         },
-        { session: transactionSession },
       );
-      await transactionSession.endSession();
+
       return transaction;
     } catch (error) {
       throw new HttpException(error.message, error.status);

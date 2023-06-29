@@ -8,12 +8,12 @@ import { query } from 'express';
 import PaginationQueryType from 'src/types/paginationQuery';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('currency-conversions')
 export class CurrencyConversionsController {
   constructor(private readonly currencyConversionsService: CurrencyConversionsService) { }
 
 
-  @UseGuards(JwtAuthGuard)
   @Post('create')
   create(@Body() createCurrencyConversionDto: CreateCurrencyConversionDto, @CurrentUser() user: JwtPayload) {
     return this.currencyConversionsService.create(createCurrencyConversionDto, user);
@@ -28,18 +28,4 @@ export class CurrencyConversionsController {
     );
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-  //   return this.currencyConversionsService.findOne(id, user); 
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateCurrencyConversionDto: UpdateCurrencyConversionDto) {
-  //   return this.currencyConversionsService.update(+id, updateCurrencyConversionDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.currencyConversionsService.remove(+id);
-  // }
 }

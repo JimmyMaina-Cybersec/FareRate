@@ -71,6 +71,7 @@ export class FloatService {
       return currentFloat.updateOne({
         ...updateFloatDto,
         currentAmount: updateFloatDto.addedAmount + currentFloat.currentAmount,
+        initialmount: updateFloatDto.addedAmount + currentFloat.initialmount,
         updatedBy: user._id,
         updatedAt: new Date()
       }, { new: true }).exec()
@@ -79,16 +80,7 @@ export class FloatService {
   }
 
   async closeFloat(id: string, user: JwtPayload) {
-    if (user.role == 'admin' || user.role == 'service agent') {
-      // const currentFloat = await this.floatModel.findById(id).exec()
-      // if (currentFloat.status == 'closed') {
-      //   throw new ConflictException('Float is already closed')
-      // }
-      // return currentFloat.updateOne({
-      //   status: 'closed',
-      //   closedBy: user._id,
-      //   closedAt: new Date()
-      // }, { new: true }).exec()
+    if (user.role == 'admin' || user.role == 'super user') {
       return this.floatModel.updateMany({ serviceAgent: id, status: 'active' }, {
         status: 'closed',
         closedBy: user._id,
@@ -99,7 +91,7 @@ export class FloatService {
   }
 
   remove(id: string, user: JwtPayload,) {
-    if (user.role == 'admin' || user.role == 'service agent') {
+    if (user.role == 'admin' || user.role == 'super user') {
       return this.floatModel.findByIdAndDelete(id).exec()
     }
     throw new UnauthorizedException('You are not authorized to perform this action')
