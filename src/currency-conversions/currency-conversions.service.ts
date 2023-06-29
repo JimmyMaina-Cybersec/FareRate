@@ -88,21 +88,26 @@ export class CurrencyConversionsService {
 
   async findAll(
     user: JwtPayload,
-    query: PaginationQueryType,
-    filters: { trasactionType?: String; createdBy?: string },
+    filters: { trasactionType?: String; createdBy?: string, page?: number, resPerPage?: number },
   ): Promise<{
     data: CurrencyConversionDocument[];
     page: number,
     resPerPage: number,
     numberOfPages: number
   }> {
-    const currentPage = query.page ?? 1;
-    const resPerPage = query.resPerPage ?? 20;
+    const currentPage = filters.page ?? 1;
+    const resPerPage = filters.resPerPage ?? 50;
     const skip = (currentPage - 1) * resPerPage;
 
     if (user.role == 'admin' || user.role == 'super user') {
+      delete filters.page
+      delete filters.resPerPage
+      console.log(filters)
 
-      const numberOfFloating = await this.currencyConversionModel.countDocuments({ ...filters });
+
+      const numberOfFloating = await this.currencyConversionModel.countDocuments({
+        ...filters
+      });
       if (numberOfFloating <= 0) {
         throw new HttpException('No users found', HttpStatus.NOT_FOUND);
       }
@@ -110,8 +115,11 @@ export class CurrencyConversionsService {
       const numberOfPages = Math.ceil(numberOfFloating / resPerPage);
 
       const currencyConversion: CurrencyConversionDocument[] = await this.currencyConversionModel.find(
-        { ...filters },
-      ).select('-__v').limit(resPerPage).skip(skip).exec()
+        {
+          ...filters
+
+        },
+      ).sort('-createdBy').select('-__v').limit(resPerPage).skip(skip).exec()
       return {
         data: currencyConversion,
         page: currentPage,

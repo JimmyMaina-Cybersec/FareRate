@@ -20,10 +20,9 @@ export class CurrencyConversionsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query() query: PaginationQueryType, @Query() filters: { trasactionType?: String; createdBy?: string }) {
+  findAll(@CurrentUser() user: JwtPayload, @Query() filters: { trasactionType?: String; createdBy?: string, page: number, resPerPage: number }) {
     return this.currencyConversionsService.findAll(
       user,
-      query,
       filters
     );
   }
