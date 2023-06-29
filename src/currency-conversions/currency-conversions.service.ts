@@ -28,10 +28,6 @@ export class CurrencyConversionsService {
     try {
 
 
-      const transaction = await this.currencyConversionModel.create({
-        ...createCurrencyConversionDto,
-        createdBy: user._id,
-      },);
 
 
       const init = await this.floatModel.findOne(
@@ -41,20 +37,23 @@ export class CurrencyConversionsService {
           status: 'active',
         },);
 
-      if (!init || init.currentAmount < createCurrencyConversionDto.initialAmount) {
+      console.log(init);
+
+
+      if (!init || init.currentAmount < createCurrencyConversionDto.finalAmount) {
         throw new HttpException('Insufficient Float in your till', HttpStatus.BAD_REQUEST);
       }
 
 
-      await this.floatModel.findOneAndUpdate(
+      const newFloat = await this.floatModel.findOneAndUpdate(
         {
           currency: createCurrencyConversionDto.initialCurrency,
           serviceAgent: user._id,
-
+          status: 'active',
         },
         {
           $inc: {
-            currentAmount: -createCurrencyConversionDto.initialAmount,
+            currentAmount: createCurrencyConversionDto.initialAmount,
           },
         },
 
@@ -63,14 +62,23 @@ export class CurrencyConversionsService {
         {
           currency: createCurrencyConversionDto.finalCurrency,
           serviceAgent: user._id,
-
+          status: 'active',
         },
         {
           $inc: {
-            currentAmount: createCurrencyConversionDto.finalAmount,
+            currentAmount: -createCurrencyConversionDto.finalAmount,
           },
         },
       );
+
+      console.log(newFloat);
+
+
+      const transaction = await this.currencyConversionModel.create({
+        ...createCurrencyConversionDto,
+        createdBy: user._id,
+      },);
+
 
       return transaction;
     } catch (error) {
