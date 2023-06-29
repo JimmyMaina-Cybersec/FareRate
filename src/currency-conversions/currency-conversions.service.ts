@@ -34,15 +34,15 @@ export class CurrencyConversionsService {
       },);
 
 
-      const init = await this.floatModel.findOneAndUpdate(
+      const init = await this.floatModel.findOne(
         {
           currency: createCurrencyConversionDto.initialCurrency,
           serviceAgent: user._id,
           status: 'active',
         },);
 
-      if (init.currentAmount < createCurrencyConversionDto.initialAmount) {
-        throw new HttpException('Insufficient funds', HttpStatus.BAD_REQUEST);
+      if (!init || init.currentAmount < createCurrencyConversionDto.initialAmount) {
+        throw new HttpException('Insufficient Float in your till', HttpStatus.BAD_REQUEST);
       }
 
 
@@ -50,7 +50,7 @@ export class CurrencyConversionsService {
         {
           currency: createCurrencyConversionDto.initialCurrency,
           serviceAgent: user._id,
-          status: 'active',
+
         },
         {
           $inc: {
@@ -63,7 +63,7 @@ export class CurrencyConversionsService {
         {
           currency: createCurrencyConversionDto.finalCurrency,
           serviceAgent: user._id,
-          status: 'active',
+
         },
         {
           $inc: {
