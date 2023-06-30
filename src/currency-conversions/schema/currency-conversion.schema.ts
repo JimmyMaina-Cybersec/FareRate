@@ -34,12 +34,16 @@ export class CurrencyConversion {
   })
   createdBy: Types.ObjectId;
 
+  @Prop({ type: String, default: null })
+  agentName: string;
+
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'User',
     default: null,
   })
   updatedBy: Types.ObjectId;
+
 }
 
 export const CurrencyConversionSchema =
