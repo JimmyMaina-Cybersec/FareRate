@@ -117,9 +117,8 @@ export class CurrencyConversionsService {
       const currencyConversion: CurrencyConversionDocument[] = await this.currencyConversionModel.find(
         {
           ...filters
-
         },
-      ).sort('-createdBy').select('-__v').limit(resPerPage).skip(skip).exec()
+      ).sort({ createdAt: -1 }).select('-__v').limit(resPerPage).skip(skip).exec()
       return {
         data: currencyConversion,
         page: currentPage,
