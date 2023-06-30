@@ -30,18 +30,21 @@ export class CurrencyConversionsService {
 
 
 
-      const init = await this.floatModel.findOne(
+      const finCurr = await this.floatModel.findOne(
         {
-          currency: createCurrencyConversionDto.initialCurrency,
+          currency: createCurrencyConversionDto.finalCurrency,
           serviceAgent: user._id,
           status: 'active',
         },);
 
-      console.log(init);
+      console.log(finCurr);
 
+      if (!finCurr) {
+        throw new HttpException(`${createCurrencyConversionDto.finalCurrency} Float not assigned `, HttpStatus.BAD_REQUEST);
+      }
 
-      if (!init || init.currentAmount < createCurrencyConversionDto.finalAmount) {
-        throw new HttpException('Insufficient Float in your till', HttpStatus.BAD_REQUEST);
+      if (!finCurr || finCurr.currentAmount < createCurrencyConversionDto.finalAmount) {
+        throw new HttpException(`Insufficient ${createCurrencyConversionDto.finalCurrency} Float in your till`, HttpStatus.BAD_REQUEST);
       }
 
 
@@ -77,6 +80,7 @@ export class CurrencyConversionsService {
       const transaction = await this.currencyConversionModel.create({
         ...createCurrencyConversionDto,
         createdBy: user._id,
+        agentName: user.firstName + ' ' + user.lastName,
       },);
 
 
