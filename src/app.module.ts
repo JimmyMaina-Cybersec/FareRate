@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { FloatModule } from './float/float.module';
 import { ShopModule } from './shops/shop.module';
 // import { TransactionRateModule } from './transaction-rate/transaction-rate.module';
+import { MobileAndBankFloatModule } from './mobile-and-bank-float/mobile-and-bank-float.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ShopModule } from './shops/shop.module';
     AuthModule,
     FloatModule,
     ShopModule,
+    MobileAndBankFloatModule,
     // TransactionRateModule,
   ],
   controllers: [AppController],
