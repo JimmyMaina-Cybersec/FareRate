@@ -13,13 +13,14 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { UpdateLoanDto } from './dto/update-loan.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('loans')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) {}
+  constructor(private readonly loansService: LoansService) { }
 
-  @Post()
+  @Post('new-loan')
   create(
     @Body() createLoanDto: CreateLoanDto,
     @CurrentUser() user: JwtPayload,
@@ -28,17 +29,17 @@ export class LoansController {
   }
 
   @Get()
-  findAll() {
-    return this.loansService.findAll();
+  findAll(@Query() filters: { shop?: String; agent?: string, page: number, resPerPage: number }, @CurrentUser() user: JwtPayload) {
+    return this.loansService.findAll(user, filters);
   }
 
-  @Get('search')
-  findPendingLoansByIdNo(@Query('idNo') idNo: string) {
+  @Get(':idNo')
+  findPendingLoansByIdNo(@Param('idNo') idNo: string,) {
     return this.loansService.findPendingLoansByIdNo(idNo);
   }
 
-  @Patch(':id/pay')
-  update(@Param('id') id: string, @Body('amount') amount: number) {
-    return this.loansService.update(id, amount);
+  @Patch('pay/:id')
+  update(@Param('id') loanId: string, @Body() updateLoanBody: UpdateLoanDto, @CurrentUser() user: JwtPayload) {
+    return this.loansService.update(loanId, updateLoanBody, user);
   }
 }
