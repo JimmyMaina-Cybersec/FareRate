@@ -12,7 +12,7 @@ dotenv.config();
 
 @Injectable()
 export class LoansService {
-  constructor(@InjectModel(Loan.name) private loanModel: Model<Loan>) {}
+  constructor(@InjectModel(Loan.name) private loanModel: Model<Loan>) { }
 
   async create(createLoanDto: CreateLoanDto, request: Request) {
     const { amount, name, idNo, phoneNo } = createLoanDto;
@@ -20,7 +20,7 @@ export class LoansService {
 
     const authorizationHeader = request.headers.authorization;
     const token = authorizationHeader.replace('Bearer ', '');
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as { agentId: string; shopId: string };
+    const decodedToken = jwt.verify(token, 'b49f49e998433edb4c73bdc6def2eb4984349ba46fb9f76010762b5af56455bc441e1f340b2b13973527a45da82aa882da1b4d9fa6a659ab2881f23cd1a4fece') as { agentId: string; shopId: string };
     const agentId = decodedToken.agentId;
     const shopId = decodedToken.shopId;
     const id = uuid();

@@ -22,13 +22,15 @@ export class AuthService {
     private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async login(createAuthDto: CreateAuthDto) {
+
     try {
+
       const user = await this.userModel.findOne({ idNo: createAuthDto.idNo });
       if (!user) {
-        throw new ForbiddenException('Invalid credentials');
+        throw new ForbiddenException('User Does Not Exist');
       }
 
       // TODO: Temporary solution as bcrypt was removed due to incompatibility with azure functionsnest add @nestjs/azure-func-http

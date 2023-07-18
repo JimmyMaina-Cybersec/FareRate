@@ -13,9 +13,7 @@ export class RefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest:
         ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get(
-        'REFRESH_TOKEN_SECRET',
-      ),
+      secretOrKey: 'b49f49e998433edb4c73bdc6def2eb4984349ba46fb9f76010762b5af56455bc441e1f340b2b13973527a45da82aa882da1b4d9fa6a659ab2881f23cd1a4fece',
       passReqToCallback: true,
     });
   }
