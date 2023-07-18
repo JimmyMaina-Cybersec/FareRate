@@ -1,29 +1,45 @@
-import { Controller, Get, Post, Body, Param, Patch, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { LoansService } from './loans.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
-import { Request } from 'express';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtPayload } from 'src/types/jwt-payload';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { UpdateLoanDto } from './dto/update-loan.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('loans')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) {}
+  constructor(private readonly loansService: LoansService) { }
 
-  @Post()
-  create(@Body() createLoanDto: CreateLoanDto, @Req() request: Request) {
-    return this.loansService.create(createLoanDto, request);
+  @Post('new-loan')
+  create(
+    @Body() createLoanDto: CreateLoanDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.loansService.create(createLoanDto, user);
   }
 
   @Get()
-  findAll() {
-    return this.loansService.findAll();
+  findAll(@Query() filters: { shop?: String; agent?: string, page: number, resPerPage: number }, @CurrentUser() user: JwtPayload) {
+    return this.loansService.findAll(user, filters);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.loansService.findOne(id);
+  @Get(':idNo')
+  findPendingLoansByIdNo(@Param('idNo') idNo: string,) {
+    return this.loansService.findPendingLoansByIdNo(idNo);
   }
 
-  @Patch(':id/pay')
-  update(@Param('id') id: string, @Body('amount') amount: number) {
-    return this.loansService.update(id, amount);
+  @Patch('pay/:id')
+  update(@Param('id') loanId: string, @Body() updateLoanBody: UpdateLoanDto, @CurrentUser() user: JwtPayload) {
+    return this.loansService.update(loanId, updateLoanBody, user);
   }
 }

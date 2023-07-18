@@ -7,6 +7,9 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtPayload } from 'src/types/jwt-payload';
+
+import UserType from 'src/types/user';
+
 import PaginationQueryType from 'src/types/paginationQuery';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';

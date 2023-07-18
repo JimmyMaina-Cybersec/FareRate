@@ -1,6 +1,6 @@
+/* eslint-disable prettier/prettier */
 import {
   ForbiddenException,
-  HttpCode,
   HttpException,
   HttpStatus,
   Injectable,
@@ -22,7 +22,7 @@ export class AuthService {
     private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async login(createAuthDto: CreateAuthDto) {
 
@@ -53,9 +53,9 @@ export class AuthService {
       idNo: user.idNo,
       phone: user.phone,
       email: user.email,
+      shop: user.shop,
       photoURL: user.photoURL,
       role: user.role,
-      // permissions: user.permission,
     };
     try {
       const [accessToken, refreshToken] = await Promise.all([
