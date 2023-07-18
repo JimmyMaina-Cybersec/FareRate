@@ -22,7 +22,7 @@ export class AuthService {
     private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async login(createAuthDto: CreateAuthDto) {
     try {
@@ -58,12 +58,14 @@ export class AuthService {
     try {
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync(payload, {
-          secret: this.configService.get('ACCESS_TOKEN_SECRET'),
-          expiresIn: this.configService.get('JWT_EXPIRATION_TIME'),
+          secret:
+            'b49f49e998433edb4c73bdc6def2eb4984349ba46fb9f76010762b5af56455bc441e1f340b2b13973527a45da82aa882da1b4d9fa6a659ab2881f23cd1a4fece',
+          expiresIn: '30d',
         }),
         this.jwtService.signAsync(payload, {
-          secret: this.configService.get('REFRESH_TOKEN_SECRET'),
-          expiresIn: this.configService.get('REFRESH_TOKEN_EXPIRATION_TIME'),
+          secret:
+            'b49f49e998433edb4c73bdc6def2eb4984349ba46fb9f76010762b5af56455bc441e1f340b2b13973527a45da82aa882da1b4d9fa6a659ab2881f23cd1a4fece',
+          expiresIn: '30d',
         }),
       ]);
 

@@ -19,7 +19,7 @@ import { LoansModule } from './loans/loans.module';
     }),
     MongooseModule.forRootAsync({
       useFactory: async () => ({
-        uri: process.env.MONGODB_CONNECTION_STRING,
+        uri: 'mongodb+srv://wekesa350:wekesa350@farerate.pftuk3b.mongodb.net/?retryWrites=true&w=majority',
       }),
     }),
     UsersModule,
