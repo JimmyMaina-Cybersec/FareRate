@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { ObjectId } from 'mongodb';
-import { Types } from 'mongoose';
-import { Permission } from './permission';
+// import { Types } from 'mongoose';
+// import { Permission } from './permission';
 
 export class JwtPayload {
   _id: ObjectId | string;
@@ -9,6 +10,7 @@ export class JwtPayload {
   idNo: string;
   phone: string;
   email: string;
+  shop: ObjectId | string;
   photoURL: string;
   role:
     | 'super user'

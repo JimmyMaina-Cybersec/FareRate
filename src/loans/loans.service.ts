@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { Loan } from './entities/loan.entity';
 import { Request } from 'express';
@@ -20,20 +19,21 @@ export class LoansService {
 
     const authorizationHeader = request.headers.authorization;
     const token = authorizationHeader.replace('Bearer ', '');
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as { agentId: string; shopId: string };
-    const agentId = decodedToken.agentId;
-    const shopId = decodedToken.shopId;
-    const id = uuid();
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as {
+      _id: string;
+      shop: string;
+    };
+    const user = decodedToken._id;
+    const shop = decodedToken.shop;
 
     const loan = new this.loanModel({
-      _id: id,
       amount,
       name,
       idNo,
       phoneNo,
       dateOfIssue,
-      agentId,
-      shopId,
+      user,
+      shop,
     });
 
     return await loan.save();
@@ -44,9 +44,13 @@ export class LoansService {
   }
 
   async findOne(idNo: string) {
-    const loans = await this.loanModel.find({ idNo, amount: { $gt: 0 } }).exec();
+    const loans = await this.loanModel
+      .find({ idNo, amount: { $gt: 0 } })
+      .exec();
     if (loans.length === 0) {
-      throw new NotFoundException(`No loans found for this user with ID No. ${idNo}`);
+      throw new NotFoundException(
+        `No loans found for this user with ID No. ${idNo}`,
+      );
     }
     return loans;
   }
@@ -59,7 +63,9 @@ export class LoansService {
     }
 
     if (amount > loan.amount) {
-      throw new Error(`Amount to be paid exceeds remaining debt ${loan.amount}`);
+      throw new Error(
+        `Amount to be paid exceeds remaining debt ${loan.amount}`,
+      );
     } else if (amount === loan.amount) {
       loan.amount = 0;
       await loan.save();

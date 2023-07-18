@@ -19,10 +19,10 @@ export class Loan extends Document {
   dateOfIssue: Date;
 
   @Prop({ required: true })
-  agentId: string;
+  user: string;
 
   @Prop({ required: true })
-  shopId: string;
+  shop: string;
 }
 
 export const LoanSchema = SchemaFactory.createForClass(Loan);
