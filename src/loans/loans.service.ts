@@ -15,9 +15,11 @@ export class LoansService {
     @InjectModel(Installment.name) private installmentModel: Model<Installment>,
   ) { }
 
+
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     const { amount, name, idNo, phoneNo } = createLoanDto;
     const dateOfIssue = new Date();
+
 
     const loan = new this.loanModel({
       amount,
