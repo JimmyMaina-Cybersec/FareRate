@@ -6,7 +6,6 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
 import { JwtPayload } from 'src/types/jwt-payload';
 import UserType from 'src/types/user';
-import { Query as ExpressQuery } from 'express-serve-static-core';
 import PaginationQueryType from 'src/types/paginationQuery';
 
 
