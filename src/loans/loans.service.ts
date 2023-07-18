@@ -3,28 +3,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { Loan } from './entities/loan.entity';
-import { Request } from 'express';
-import * as jwt from 'jsonwebtoken';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import { CreateInstallmentDto } from './dto/installments.dto';
+import { Installment } from './entities/installment.entity';
+import { JwtPayload } from 'src/types/jwt-payload';
 
 @Injectable()
 export class LoansService {
-  constructor(@InjectModel(Loan.name) private loanModel: Model<Loan>) {}
+  constructor(
+    @InjectModel(Loan.name) private loanModel: Model<Loan>,
+    @InjectModel(Installment.name) private installmentModel: Model<Installment>,
+  ) {}
 
-  async create(createLoanDto: CreateLoanDto, request: Request) {
+  async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     const { amount, name, idNo, phoneNo } = createLoanDto;
     const dateOfIssue = new Date();
-
-    const authorizationHeader = request.headers.authorization;
-    const token = authorizationHeader.replace('Bearer ', '');
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as {
-      _id: string;
-      shop: string;
-    };
-    const user = decodedToken._id;
-    const shop = decodedToken.shop;
 
     const loan = new this.loanModel({
       amount,
@@ -32,18 +24,33 @@ export class LoansService {
       idNo,
       phoneNo,
       dateOfIssue,
-      user,
-      shop,
+      user: user._id,
+      shop: user.shop,
     });
 
     return await loan.save();
+  }
+
+  async createInstallment(
+    loanId: string,
+    createInstallmentDto: CreateInstallmentDto,
+  ) {
+    const { amountPaid, user } = createInstallmentDto;
+
+    const installment = new this.installmentModel({
+      amountPaid,
+      user,
+      loan: loanId,
+    });
+
+    return await installment.save();
   }
 
   async findAll() {
     return await this.loanModel.find().exec();
   }
 
-  async findOne(idNo: string) {
+  async findPendingLoansByIdNo(idNo: string) {
     const loans = await this.loanModel
       .find({ idNo, amount: { $gt: 0 } })
       .exec();
