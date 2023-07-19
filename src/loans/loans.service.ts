@@ -81,6 +81,7 @@ export class LoansService {
             '-refreshToken -updatedAt -createdAt -createdBy -shop',
           )
           .limit(resPerPage)
+          .sort({ createdAt: -1 })
           .skip(skip)
           .exec(),
         page: currentPage,
@@ -92,6 +93,7 @@ export class LoansService {
       data: await this.loanModel
         .find({ createdBy: user._id })
         .limit(resPerPage)
+        .sort({ createdAt: -1 })
         .skip(skip)
         .exec(),
       page: currentPage,
@@ -101,9 +103,7 @@ export class LoansService {
   }
 
   async findPendingLoansByIdNo(idNo: string) {
-    const loans = await this.loanModel
-      .find({ idNo, amount: { $gt: 0 } })
-      .exec();
+    const loans = await this.loanModel.find({ customerIdNo: idNo }).exec();
     if (loans.length === 0) {
       throw new NotFoundException(
         `No loans found for this user with ID No. ${idNo}`,
