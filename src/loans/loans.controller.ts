@@ -1,10 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -14,11 +14,12 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UpdateLoanDto } from './dto/update-loan.dto';
+import PaginationQueryType from '../types/paginationQuery';
 
 @UseGuards(JwtAuthGuard)
 @Controller('loans')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) { }
+  constructor(private readonly loansService: LoansService) {}
 
   @Post('new-loan')
   create(
@@ -29,17 +30,29 @@ export class LoansController {
   }
 
   @Get()
-  findAll(@Query() filters: { shop?: String; agent?: string, page: number, resPerPage: number }, @CurrentUser() user: JwtPayload) {
-    return this.loansService.findAll(user, filters);
+  findAll(
+    @Query()
+    filters: {
+      shop?: string;
+      agent?: string;
+    },
+    @Query() pagination: PaginationQueryType,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.loansService.findAll(user, filters, pagination);
   }
 
   @Get(':idNo')
-  findPendingLoansByIdNo(@Param('idNo') idNo: string,) {
+  findPendingLoansByIdNo(@Param('idNo') idNo: string) {
     return this.loansService.findPendingLoansByIdNo(idNo);
   }
 
   @Patch('pay/:id')
-  update(@Param('id') loanId: string, @Body() updateLoanBody: UpdateLoanDto, @CurrentUser() user: JwtPayload) {
+  update(
+    @Param('id') loanId: string,
+    @Body() updateLoanBody: UpdateLoanDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.loansService.update(loanId, updateLoanBody, user);
   }
 }

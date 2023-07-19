@@ -8,8 +8,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtPayload } from 'src/types/jwt-payload';
 
-import UserType from 'src/types/user';
-
 import PaginationQueryType from 'src/types/paginationQuery';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,18 +27,18 @@ export class UsersService {
       .select('-refreshToken -__v')
       .exec();
   }
+
   create(createUserDto: CreateUserDto, user: JwtPayload) {
     try {
       if (user.role == 'super user' || user.role == 'admin') {
-        const newUser = new this.userModel({
+        return new this.userModel({
           ...createUserDto,
           createdBy: user._id,
           photoURL: `https://api.dicebear.com/6.x/thumbs/svg?seed=${createUserDto.idNo}`,
         }).save();
-        return newUser;
       }
 
-      throw new HttpException(
+      return new HttpException(
         'You are not authorized to perform this action',
         HttpStatus.UNAUTHORIZED,
       );
@@ -81,6 +79,7 @@ export class UsersService {
           ...filter,
         })
         .select('-refreshToken -__v')
+        .sort({ firstName: -1 })
         .limit(resPerPage)
         .skip(skip)
         .exec();

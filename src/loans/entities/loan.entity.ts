@@ -4,7 +4,7 @@ import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
 export type LoanDocument = HydratedDocument<Loan>
 @Schema({ timestamps: true })
-export class Loan extends Document {
+export class Loan {
   @Prop({ required: true })
   totalLoan: number;
 
