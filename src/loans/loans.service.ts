@@ -85,13 +85,19 @@ export class LoansService {
           .exec(),
         page: currentPage,
         resPerPage,
+        numberOfPages: Math.ceil(docsCount / resPerPage),
       };
     }
-    return await this.loanModel
-      .find({ createdBy: user._id })
-      .limit(resPerPage)
-      .skip(skip)
-      .exec();
+    return {
+      data: await this.loanModel
+        .find({ createdBy: user._id })
+        .limit(resPerPage)
+        .skip(skip)
+        .exec(),
+      page: currentPage,
+      resPerPage,
+      numberOfPages: Math.ceil(docsCount / resPerPage),
+    };
   }
 
   async findPendingLoansByIdNo(idNo: string) {
@@ -111,12 +117,13 @@ export class LoansService {
       const loan = await this.loanModel.findById(loanId).exec();
 
       if (!loan) {
-        throw new NotFoundException(`Loan with ID ${loanId} not found`);
+        return new NotFoundException(`Loan with ID ${loanId} not found`);
       }
 
       if (updateLoanDTO.amount > loan.balance) {
-        throw new Error(
+        return new HttpException(
           `Amount to be paid exceeds remaining debt ${loan.balance}`,
+          HttpStatus.CONFLICT,
         );
       }
 
@@ -131,7 +138,7 @@ export class LoansService {
       if (loan.balance === updateLoanDTO.amount) {
         loan.status = 'paid';
       } else {
-        loan.status = 'unpaid';
+        loan.status = 'partially paid';
       }
       return await this.loanModel.findByIdAndUpdate(
         loanId,
