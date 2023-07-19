@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,7 +9,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { Loan } from './entities/loan.entity';
-import { CreateInstallmentDto } from './dto/installments.dto';
 import { Installment } from './entities/installment.entity';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
@@ -35,21 +35,6 @@ export class LoansService {
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
-  }
-
-  async createInstallment(
-    loanId: string,
-    createInstallmentDto: CreateInstallmentDto,
-  ) {
-    const { amountPaid, user } = createInstallmentDto;
-
-    const installment = new this.installmentModel({
-      amountPaid,
-      user,
-      loan: loanId,
-    });
-
-    return await installment.save();
   }
 
   async findAll(
@@ -115,27 +100,30 @@ export class LoansService {
   async update(loanId: string, updateLoanDTO: UpdateLoanDto, user: JwtPayload) {
     try {
       const loan = await this.loanModel.findById(loanId).exec();
+      console.log(loan);
 
       if (!loan) {
         return new NotFoundException(`Loan with ID ${loanId} not found`);
       }
 
-      if (updateLoanDTO.amount > loan.balance) {
-        return new HttpException(
+      if (updateLoanDTO.amountPaid > loan.balance) {
+        throw new ConflictException(
           `Amount to be paid exceeds remaining debt ${loan.balance}`,
-          HttpStatus.CONFLICT,
         );
       }
 
+      console.log(loan.balance);
+      console.log(updateLoanDTO);
+
       const installment = await new this.installmentModel({
-        amountPaid: updateLoanDTO.amount,
+        amountPaid: updateLoanDTO.amountPaid,
         user: user._id,
         shop: user.shop,
         loan: loanId,
-        balance: loan.balance - updateLoanDTO.amount,
+        balance: loan.balance - updateLoanDTO.amountPaid,
       }).save();
 
-      if (loan.balance === updateLoanDTO.amount) {
+      if (loan.balance === updateLoanDTO.amountPaid) {
         loan.status = 'paid';
       } else {
         loan.status = 'partially paid';
@@ -143,14 +131,17 @@ export class LoansService {
       return await this.loanModel.findByIdAndUpdate(
         loanId,
         {
-          $inc: { balance: -updateLoanDTO.amount },
+          $inc: { balance: -updateLoanDTO.amountPaid },
           $push: { installments: installment._id },
           status: loan.status,
         },
         { new: true },
       );
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error.message,
+        error.status ?? HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }
