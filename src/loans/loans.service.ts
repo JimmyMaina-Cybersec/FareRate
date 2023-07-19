@@ -100,7 +100,6 @@ export class LoansService {
   async update(loanId: string, updateLoanDTO: UpdateLoanDto, user: JwtPayload) {
     try {
       const loan = await this.loanModel.findById(loanId).exec();
-      console.log(loan);
 
       if (!loan) {
         return new NotFoundException(`Loan with ID ${loanId} not found`);
@@ -111,9 +110,6 @@ export class LoansService {
           `Amount to be paid exceeds remaining debt ${loan.balance}`,
         );
       }
-
-      console.log(loan.balance);
-      console.log(updateLoanDTO);
 
       const installment = await new this.installmentModel({
         amountPaid: updateLoanDTO.amountPaid,
@@ -138,6 +134,7 @@ export class LoansService {
         { new: true },
       );
     } catch (error) {
+      console.error(error);
       throw new HttpException(
         error.message,
         error.status ?? HttpStatus.BAD_REQUEST,
