@@ -1,20 +1,19 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateLoanDto {
-    @IsNotEmpty()
-    @IsNumber()
-    amount: number;
+  @IsNotEmpty()
+  @IsNumber()
+  totalLoan: number;
 
-    @IsNotEmpty()
-    @IsString()
-    name: string;
+  @IsNotEmpty()
+  @IsString()
+  customerName: string;
 
-    @IsNotEmpty()
-    @IsString()
-    idNo: string;
-    
-    @IsNotEmpty()
-    @IsString()
-    phoneNo: string;
-  }
-  
+  @IsNotEmpty()
+  @IsString()
+  customerIdNo: string;
+
+  @IsNotEmpty()
+  @IsString()
+  customerPhone: string;
+}

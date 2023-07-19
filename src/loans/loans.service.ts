@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateLoanDto } from './dto/create-loan.dto';
@@ -7,31 +12,29 @@ import { CreateInstallmentDto } from './dto/installments.dto';
 import { Installment } from './entities/installment.entity';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
+import PaginationQueryType from '../types/paginationQuery';
 
 @Injectable()
 export class LoansService {
   constructor(
     @InjectModel(Loan.name) private loanModel: Model<Loan>,
     @InjectModel(Installment.name) private installmentModel: Model<Installment>,
-  ) { }
-
+  ) {}
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
-    const { amount, name, idNo, phoneNo } = createLoanDto;
-    const dateOfIssue = new Date();
+    try {
+      console.log(user);
+      const loan = new this.loanModel({
+        ...createLoanDto,
+        balance: createLoanDto.totalLoan,
+        createdBy: user._id,
+        shop: user.shop,
+      });
 
-
-    const loan = new this.loanModel({
-      amount,
-      name,
-      idNo,
-      phoneNo,
-      dateOfIssue,
-      createdBy: user._id,
-      shop: user.shop,
-    });
-
-    return await loan.save();
+      return await loan.save();
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createInstallment(
@@ -49,12 +52,46 @@ export class LoansService {
     return await installment.save();
   }
 
-  async findAll(user: JwtPayload, filters: { shop?: String; agent?: string, page: number, resPerPage: number }) {
-    if (user.role === 'admin') {
-      return await this.loanModel.find().populate('createdBy').exec();
-    }
-    return await this.loanModel.find({ createdBy: user._id }).exec();
+  async findAll(
+    user: JwtPayload,
+    filters: {
+      shop?: string;
+      createdBy?: string;
+    },
+    paginationQuery: PaginationQueryType,
+  ) {
+    const currentPage = paginationQuery.page ?? 1;
+    const resPerPage = paginationQuery.resPerPage ?? 20;
+    const skip = (currentPage - 1) * resPerPage;
 
+    let docsCount = 0;
+
+    if (user.role === 'admin') {
+      docsCount = await this.loanModel.countDocuments({
+        ...filters,
+      });
+
+      return {
+        data: await this.loanModel
+          .find({
+            ...filters,
+          })
+          .populate(
+            'createdBy',
+            '-refreshToken -updatedAt -createdAt -createdBy -shop',
+          )
+          .limit(resPerPage)
+          .skip(skip)
+          .exec(),
+        page: currentPage,
+        resPerPage,
+      };
+    }
+    return await this.loanModel
+      .find({ createdBy: user._id })
+      .limit(resPerPage)
+      .skip(skip)
+      .exec();
   }
 
   async findPendingLoansByIdNo(idNo: string) {
@@ -69,11 +106,7 @@ export class LoansService {
     return loans;
   }
 
-
-
-
   async update(loanId: string, updateLoanDTO: UpdateLoanDto, user: JwtPayload) {
-
     try {
       const loan = await this.loanModel.findById(loanId).exec();
 
@@ -85,7 +118,6 @@ export class LoansService {
         throw new Error(
           `Amount to be paid exceeds remaining debt ${loan.balance}`,
         );
-
       }
 
       const installment = await new this.installmentModel({
@@ -101,15 +133,17 @@ export class LoansService {
       } else {
         loan.status = 'unpaid';
       }
-      const updatedLoan = await this.loanModel.findByIdAndUpdate(loanId, {
-        $inc: { balance: -updateLoanDTO.amount },
-        $push: { installments: installment._id },
-        status: loan.status
-      }, { new: true });
-
-      return updatedLoan;
+      return await this.loanModel.findByIdAndUpdate(
+        loanId,
+        {
+          $inc: { balance: -updateLoanDTO.amount },
+          $push: { installments: installment._id },
+          status: loan.status,
+        },
+        { new: true },
+      );
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

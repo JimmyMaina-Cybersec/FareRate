@@ -1,18 +1,13 @@
 /* eslint-disable prettier/prettier */
-import {
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
-import { CreateAuthDto } from './dto/login.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from 'src/users/schema/user.schema';
+import {ForbiddenException, HttpException, HttpStatus, Injectable,} from '@nestjs/common';
+import {CreateAuthDto} from './dto/login.dto';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
+import {User, UserDocument} from 'src/users/schema/user.schema';
 
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { JwtPayload } from 'src/types/jwt-payload';
+import {JwtService} from '@nestjs/jwt';
+import {ConfigService} from '@nestjs/config';
+import {JwtPayload} from 'src/types/jwt-payload';
 import AuthToken from 'src/types/authToken';
 
 @Injectable()
@@ -25,9 +20,7 @@ export class AuthService {
   ) {}
 
   async login(createAuthDto: CreateAuthDto) {
-
     try {
-
       const user = await this.userModel.findOne({ idNo: createAuthDto.idNo });
       if (!user) {
         throw new ForbiddenException('User Does Not Exist');
@@ -57,6 +50,8 @@ export class AuthService {
       photoURL: user.photoURL,
       role: user.role,
     };
+
+    console.log(user);
     try {
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync(payload, {
