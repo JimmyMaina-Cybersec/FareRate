@@ -15,10 +15,10 @@ export class Installment {
   loan: string;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'User' })
-  user: string;
+  user: Types.ObjectId;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Shop' })
-  shop: string;
+  shop: Types.ObjectId;
 }
 
 export const InstallmentSchema = SchemaFactory.createForClass(Installment);

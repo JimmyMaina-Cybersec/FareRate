@@ -17,9 +17,11 @@ import PaginationQueryType from '../types/paginationQuery';
 @Injectable()
 export class LoansService {
   constructor(
-    @InjectModel(Loan.name) private loanModel: Model<Loan>,
-    @InjectModel(Installment.name) private installmentModel: Model<Installment>,
-  ) {}
+    @InjectModel(Loan.name)
+    private loanModel: Model<Loan>,
+    @InjectModel(Installment.name)
+    private installmentModel: Model<Installment>,
+  ) { }
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
@@ -64,7 +66,7 @@ export class LoansService {
           .populate(
             'createdBy',
             '-refreshToken -updatedAt -createdAt -createdBy -shop',
-          )
+          ).populate('installments', '-updatedAt -__v  -loan')
           .limit(resPerPage)
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -78,6 +80,7 @@ export class LoansService {
       data: await this.loanModel
         .find({ createdBy: user._id })
         .limit(resPerPage)
+
         .sort({ createdAt: -1 })
         .skip(skip)
         .exec(),
