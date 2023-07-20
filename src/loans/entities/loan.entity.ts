@@ -11,6 +11,9 @@ export class Loan {
   @Prop({ required: true })
   balance: number;
 
+  @Prop({ default: 'KES' })
+  currency: string;
+
   @Prop({ required: true })
   customerName: string;
 

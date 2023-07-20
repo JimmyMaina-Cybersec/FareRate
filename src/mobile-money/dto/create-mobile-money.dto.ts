@@ -15,5 +15,5 @@ export class CreateMobileMoneyDto {
 
     @IsNotEmpty()
     @IsString()
-    mobileMoney: string;
+    provider: string;
 }

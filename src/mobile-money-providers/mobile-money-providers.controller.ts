@@ -1,11 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MobileMoneyProvidersService } from './mobile-money-providers.service';
 import { CreateMobileMoneyProviderDto } from './dto/create-mobile-money-provider.dto';
 import { UpdateMobileMoneyProviderDto } from './dto/update-mobile-money-provider.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtPayload } from 'src/types/jwt-payload';
 
+
+@UseGuards(JwtAuthGuard)
 @Controller('mobile-money-providers')
 export class MobileMoneyProvidersController {
-  constructor(private readonly mobileMoneyProvidersService: MobileMoneyProvidersService) {}
+  constructor(private readonly mobileMoneyProvidersService: MobileMoneyProvidersService) { }
 
   @Post()
   create(@Body() createMobileMoneyProviderDto: CreateMobileMoneyProviderDto) {
@@ -19,16 +24,16 @@ export class MobileMoneyProvidersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.mobileMoneyProvidersService.findOne(+id);
+    return this.mobileMoneyProvidersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMobileMoneyProviderDto: UpdateMobileMoneyProviderDto) {
-    return this.mobileMoneyProvidersService.update(+id, updateMobileMoneyProviderDto);
+  @Patch('update/:id')
+  update(@Param('id') id: string, @Body() updateMobileMoneyProviderDto: UpdateMobileMoneyProviderDto, @CurrentUser() user: JwtPayload) {
+    return this.mobileMoneyProvidersService.update(id, updateMobileMoneyProviderDto, user);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mobileMoneyProvidersService.remove(+id);
+  @Delete('delete/:id')
+  remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.mobileMoneyProvidersService.remove(id, user);
   }
 }

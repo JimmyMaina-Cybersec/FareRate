@@ -16,4 +16,8 @@ export class CreateLoanDto {
   @IsNotEmpty()
   @IsString()
   customerPhone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  currency: string;
 }

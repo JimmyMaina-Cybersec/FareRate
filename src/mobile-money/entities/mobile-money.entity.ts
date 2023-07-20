@@ -12,7 +12,7 @@ export class MobileMoney {
     closingAmount: number;
 
     @Prop({ default: null })
-    amountAtClosing: number;
+    agentClosingAmount: number;
 
     @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'User' })
     agent: Types.ObjectId;
@@ -35,5 +35,5 @@ export class MobileMoney {
     shop: Types.ObjectId;
 
     @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'MobileMoneyProvider' })
-    mobileMoney: Types.ObjectId;
+    provider: Types.ObjectId;
 }

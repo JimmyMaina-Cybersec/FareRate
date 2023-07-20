@@ -17,8 +17,10 @@ import PaginationQueryType from '../types/paginationQuery';
 @Injectable()
 export class LoansService {
   constructor(
-    @InjectModel(Loan.name) private loanModel: Model<Loan>,
-    @InjectModel(Installment.name) private installmentModel: Model<Installment>,
+    @InjectModel(Loan.name)
+    private loanModel: Model<Loan>,
+    @InjectModel(Installment.name)
+    private installmentModel: Model<Installment>,
   ) { }
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
