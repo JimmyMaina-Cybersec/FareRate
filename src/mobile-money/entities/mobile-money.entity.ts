@@ -37,3 +37,5 @@ export class MobileMoney {
     @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'MobileMoneyProvider' })
     provider: Types.ObjectId;
 }
+
+export const MobileMoneySchema = SchemaFactory.createForClass(MobileMoney);

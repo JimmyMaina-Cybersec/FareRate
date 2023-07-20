@@ -14,6 +14,8 @@ export class MobileMoneyProvider {
     @Prop({ required: false, default: 'active' })
     status: string;
 
-
-
 }
+
+export const MobileMoneyProviderSchema = SchemaFactory.createForClass(MobileMoneyProvider);
+
+
