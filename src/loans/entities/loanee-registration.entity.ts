@@ -13,6 +13,9 @@ export class Loanee {
   @Prop({ required: true })
   secondName: string;
 
+  @Prop({ default: null })
+  totalBalance: number;
+
   @Prop({ required: true })
   DOB: Date;
 
