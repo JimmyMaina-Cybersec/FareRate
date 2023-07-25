@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -29,13 +30,27 @@ export class LoansService {
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
-      console.log(user);
+      const { customerIdNo } = createLoanDto;
+      const customer = await this.loaneeModel.findOne({ customerIdNo });
+      if (!customer) {
+        throw new NotFoundException(
+          'Loans are offered to registered customers',
+        );
+      }
       const loan = new this.loanModel({
         ...createLoanDto,
-        balance: createLoanDto.totalLoan,
+        loanBalance: createLoanDto.loanAmount,
         createdBy: user._id,
         shop: user.shop,
       });
+
+      await this.loaneeModel
+        .findOneAndUpdate(
+          { customerIdNo },
+          { $inc: { totalBalance: createLoanDto.loanAmount } },
+          { new: true },
+        )
+        .exec();
 
       return await loan.save();
     } catch (error: any) {
@@ -45,6 +60,12 @@ export class LoansService {
 
   async createLoanee(createLoaneeDto: CreateLoaneeDto, user: JwtPayload) {
     try {
+      if (user.role != 'admin') {
+        throw new UnauthorizedException(
+          'You are not authorized to register loanees',
+        );
+      }
+
       const loanee = new this.loaneeModel({
         ...createLoaneeDto,
         createdBy: user._id,
@@ -126,9 +147,9 @@ export class LoansService {
         return new NotFoundException(`Loan with ID ${loanId} not found`);
       }
 
-      if (updateLoanDTO.amountPaid > loan.balance) {
+      if (updateLoanDTO.amountPaid > loan.loanBalance) {
         throw new ConflictException(
-          `Amount to be paid exceeds remaining debt ${loan.balance}`,
+          `Amount to be paid exceeds remaining debt ${loan.loanBalance}`,
         );
       }
 
@@ -137,23 +158,31 @@ export class LoansService {
         user: user._id,
         shop: user.shop,
         loan: loanId,
-        balance: loan.balance - updateLoanDTO.amountPaid,
+        remainingDebt: loan.loanBalance - updateLoanDTO.amountPaid,
       }).save();
 
-      if (loan.balance === updateLoanDTO.amountPaid) {
+      if (loan.loanBalance === updateLoanDTO.amountPaid) {
         loan.status = 'paid';
       } else {
         loan.status = 'partially paid';
       }
-      return await this.loanModel.findByIdAndUpdate(
+      await this.loanModel.findByIdAndUpdate(
         loanId,
         {
-          $inc: { balance: -updateLoanDTO.amountPaid },
+          $inc: { loanBalance: -updateLoanDTO.amountPaid },
           $push: { installments: installment._id },
           status: loan.status,
         },
         { new: true },
       );
+
+      return await this.loaneeModel
+        .findOneAndUpdate(
+          { idNo: loan.customerIdNo },
+          { $inc: { totalBalance: -updateLoanDTO.amountPaid } },
+          { new: true },
+        )
+        .exec();
     } catch (error) {
       console.error(error);
       throw new HttpException(
