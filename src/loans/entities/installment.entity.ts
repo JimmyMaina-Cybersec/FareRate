@@ -9,7 +9,7 @@ export class Installment {
   amountPaid: number;
 
   @Prop({ required: true })
-  balance: number;
+  remainingDebt: number;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Loan' })
   loan: string;
