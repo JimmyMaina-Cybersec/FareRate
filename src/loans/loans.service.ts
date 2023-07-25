@@ -13,6 +13,8 @@ import { Installment } from './entities/installment.entity';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
+import { CreateLoaneeDto } from './dto/create-loanee.dto';
+import { Loanee } from './entities/loanee-registration.entity';
 
 @Injectable()
 export class LoansService {
@@ -21,7 +23,9 @@ export class LoansService {
     private loanModel: Model<Loan>,
     @InjectModel(Installment.name)
     private installmentModel: Model<Installment>,
-  ) { }
+    @InjectModel(Loanee.name)
+    private loaneeModel: Model<Loanee>,
+  ) {}
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
@@ -34,6 +38,19 @@ export class LoansService {
       });
 
       return await loan.save();
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async createLoanee(createLoaneeDto: CreateLoaneeDto, user: JwtPayload) {
+    try {
+      const loanee = new this.loaneeModel({
+        ...createLoaneeDto,
+        createdBy: user._id,
+      });
+
+      return await loanee.save();
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
@@ -66,7 +83,8 @@ export class LoansService {
           .populate(
             'createdBy',
             '-refreshToken -updatedAt -createdAt -createdBy -shop',
-          ).populate('installments', '-updatedAt -__v  -loan')
+          )
+          .populate('installments', '-updatedAt -__v  -loan')
           .limit(resPerPage)
           .sort({ createdAt: -1 })
           .skip(skip)
