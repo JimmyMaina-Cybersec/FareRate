@@ -3,7 +3,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreateLoanDto {
   @IsNotEmpty()
   @IsNumber()
-  totalLoan: number;
+  loanAmount: number;
 
   @IsNotEmpty()
   @IsString()
