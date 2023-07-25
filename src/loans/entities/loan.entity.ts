@@ -1,30 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
-
-export type LoanDocument = HydratedDocument<Loan>
+export type LoanDocument = HydratedDocument<Loan>;
 @Schema({ timestamps: true })
 export class Loan {
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Loanee' })
+  customerIdNo: Types.ObjectId;
+
   @Prop({ required: true })
   totalLoan: number;
 
   @Prop({ required: true })
-  balance: number;
+  loanBalance: number;
 
   @Prop({ default: 'KES' })
   currency: string;
-
-  @Prop({ required: true })
-  customerName: string;
-
-  @Prop({ required: true })
-  customerIdNo: string;
-
-  @Prop({ required: true })
-  customerPhone: string;
-
-  @Prop({ default: null })
-  customerPhotoURL: string;
 
   @Prop({ default: 'unpaid' })
   status: string;
@@ -38,10 +28,11 @@ export class Loan {
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Shop' })
   shop: Types.ObjectId;
 
-  @Prop({ default: [], type: [{ type: SchemaTypes.ObjectId, ref: 'Installment' }] })
+  @Prop({
+    default: [],
+    type: [{ type: SchemaTypes.ObjectId, ref: 'Installment' }],
+  })
   installments: Types.ObjectId[];
-
-
 }
 
 export const LoanSchema = SchemaFactory.createForClass(Loan);
