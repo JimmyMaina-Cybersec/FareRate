@@ -7,15 +7,7 @@ export class CreateLoanDto {
 
   @IsNotEmpty()
   @IsString()
-  customerName: string;
-
-  @IsNotEmpty()
-  @IsString()
   customerIdNo: string;
-
-  @IsNotEmpty()
-  @IsString()
-  customerPhone: string;
 
   @IsNotEmpty()
   @IsString()
