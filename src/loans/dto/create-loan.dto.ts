@@ -5,17 +5,17 @@ export class CreateLoanDto {
   @IsNumber()
   totalLoan: number;
 
-  @IsNotEmpty()
-  @IsString()
-  customerName: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // customerName: string;
 
   @IsNotEmpty()
   @IsString()
   customerIdNo: string;
 
-  @IsNotEmpty()
-  @IsString()
-  customerPhone: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // customerPhone: string;
 
   @IsNotEmpty()
   @IsString()

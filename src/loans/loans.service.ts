@@ -25,7 +25,6 @@ export class LoansService {
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
-      console.log(user);
       const loan = new this.loanModel({
         ...createLoanDto,
         balance: createLoanDto.totalLoan,
