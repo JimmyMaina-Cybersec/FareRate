@@ -14,8 +14,8 @@ import { Installment } from './entities/installment.entity';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
-import { CreateLoaneeDto } from './dto/create-loanee.dto';
-import { Loanee } from './entities/loanee-registration.entity';
+import { CreateLoaneeDto } from '../loanees/dto/create-loanee.dto';
+import { Loanee } from  '../loanees/entities/loanee.entity';
 import { Shop } from '../shops/schema/shop.schma';
 
 @Injectable()
@@ -188,7 +188,7 @@ export class LoansService {
         { new: true },
       );
 
-      return await this.shopModel
+      await this.shopModel
       .findOneAndUpdate(
         { _id: loan.shop },
         { $inc: { loanMoney: updateLoanDTO.amountPaid } },
@@ -198,7 +198,7 @@ export class LoansService {
 
       return await this.loaneeModel
         .findOneAndUpdate(
-          { idNo: loan.customerIdNo },
+          { customerIdNo: loan.customerIdNo },
           { $inc: { totalBalance: -updateLoanDTO.amountPaid } },
           { new: true },
         )
