@@ -8,7 +8,7 @@ export class Loan {
   customerIdNo: Types.ObjectId;
 
   @Prop({ required: true })
-  totalLoan: number;
+  loanAmount: number;
 
   @Prop({ required: true })
   loanBalance: number;
