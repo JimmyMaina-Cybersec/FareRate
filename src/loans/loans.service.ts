@@ -30,6 +30,7 @@ export class LoansService {
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
+<<<<<<< HEAD
       const { customerIdNo } = createLoanDto;
       const customer = await this.loaneeModel.findOne({ customerIdNo });
       if (!customer) {
@@ -37,6 +38,8 @@ export class LoansService {
           'Loans are offered to registered customers',
         );
       }
+=======
+>>>>>>> 19c273c9986911843316fe5e347a85c413da2710
       const loan = new this.loanModel({
         ...createLoanDto,
         loanBalance: createLoanDto.loanAmount,

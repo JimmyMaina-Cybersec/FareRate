@@ -13,6 +13,7 @@ import { MobileAndBankFloatModule } from './mobile-and-bank-float/mobile-and-ban
 import { LoansModule } from './loans/loans.module';
 import { MobileMoneyProvidersModule } from './mobile-money-providers/mobile-money-providers.module';
 import { MobileMoneyModule } from './mobile-money/mobile-money.module';
+import { LoaneesModule } from './loanees/loanees.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MobileMoneyModule } from './mobile-money/mobile-money.module';
     LoansModule,
     MobileMoneyProvidersModule,
     MobileMoneyModule,
+    LoaneesModule,
     // TransactionRateModule,
   ],
   controllers: [AppController],
