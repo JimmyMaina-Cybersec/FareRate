@@ -17,6 +17,9 @@ export class Shop {
     @Prop({ required: true })
     country: string
 
+    @Prop({ default: null })
+    loanMoney: number | null;
+
     @Prop({ required: true })
     photoURL: string
 
