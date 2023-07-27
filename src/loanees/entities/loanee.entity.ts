@@ -19,6 +19,9 @@ export class Loanee {
     @Prop({ required: true })
     customerPhone: string;
 
+    @Prop({ default: null })
+    totalBalance: number;
+
     @Prop({ required: true })
     photoURL: string;
 
