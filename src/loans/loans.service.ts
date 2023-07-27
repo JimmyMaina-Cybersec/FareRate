@@ -41,30 +41,34 @@ export class LoansService {
         );
       }
 
-      const loan = new this.loanModel({
-        ...createLoanDto,
-        loanBalance: createLoanDto.loanAmount,
-        createdBy: user._id,
-        shop: user.shop,
-      });
-
-      await this.loaneeModel
-        .findOneAndUpdate(
-          { customerIdNo },
-          { $inc: { totalBalance: createLoanDto.loanAmount } },
-          { new: true },
-        )
-        .exec();
-
-      await this.shopModel
+      if (this.shopModel.loanMoney <= createLoanDto.loanAmount) {
+        throw new UnauthorizedException('Customer cannot be creditted. insufficient loan capital')
+      } else {
+        const loan = new this.loanModel({
+          ...createLoanDto,
+          loanBalance: createLoanDto.loanAmount,
+          createdBy: user._id,
+          shop: user.shop,
+        });
+  
+        await this.loaneeModel
           .findOneAndUpdate(
-            { _id: loan.shop },
-            { $inc: { loanMoney: -loan.loanAmount } },
+            { customerIdNo },
+            { $inc: { totalBalance: createLoanDto.loanAmount } },
             { new: true },
           )
           .exec();
-
-      return await loan.save();
+  
+        await this.shopModel
+            .findOneAndUpdate(
+              { _id: loan.shop },
+              { $inc: { loanMoney: -loan.loanAmount } },
+              { new: true },
+            )
+            .exec();
+  
+        return await loan.save();
+      }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
