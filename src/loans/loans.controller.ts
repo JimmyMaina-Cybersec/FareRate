@@ -30,11 +30,6 @@ export class LoansController {
     return this.loansService.create(createLoanDto, user);
   }
 
-  @Post('loanee-registration')
-  createLoanee(@Body() createLoaneeDto: CreateLoaneeDto, @CurrentUser() user: JwtPayload) {
-    return this.loansService.createLoanee(createLoaneeDto, user);
-  }
-
   @Get()
   findAll(
     @Query()
