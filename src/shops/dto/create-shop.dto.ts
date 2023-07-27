@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString } from 'class-validator';
+import { IsString, IsNumber } from 'class-validator';
 
 export class CreateShopDto {
   @IsString()
@@ -10,4 +10,7 @@ export class CreateShopDto {
 
   @IsString()
   country: string;
+
+  @IsNumber()
+  loanMoney: number;
 }

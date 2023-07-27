@@ -16,6 +16,7 @@ import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
 import { CreateLoaneeDto } from './dto/create-loanee.dto';
 import { Loanee } from './entities/loanee-registration.entity';
+import { Shop } from '../shops/schema/shop.schma';
 
 @Injectable()
 export class LoansService {
@@ -26,6 +27,8 @@ export class LoansService {
     private installmentModel: Model<Installment>,
     @InjectModel(Loanee.name)
     private loaneeModel: Model<Loanee>,
+    @InjectModel(Shop.name)
+    private shopModel: Model<Shop>,
   ) {}
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
@@ -52,6 +55,14 @@ export class LoansService {
           { new: true },
         )
         .exec();
+
+      await this.shopModel
+          .findOneAndUpdate(
+            { _id: loan.shop },
+            { $inc: { loanMoney: -loan.loanAmount } },
+            { new: true },
+          )
+          .exec();
 
       return await loan.save();
     } catch (error: any) {
@@ -176,6 +187,14 @@ export class LoansService {
         },
         { new: true },
       );
+
+      return await this.shopModel
+      .findOneAndUpdate(
+        { _id: loan.shop },
+        { $inc: { loanMoney: updateLoanDTO.amountPaid } },
+        { new: true },
+      )
+      .exec();
 
       return await this.loaneeModel
         .findOneAndUpdate(
