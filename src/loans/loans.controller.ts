@@ -15,7 +15,6 @@ import { JwtPayload } from 'src/types/jwt-payload';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
-import { CreateLoaneeDto } from './dto/create-loanee.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('loans')

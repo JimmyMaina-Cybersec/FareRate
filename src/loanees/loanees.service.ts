@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateLoaneeDto } from './dto/create-loanee.dto';
 import { UpdateLoaneeDto } from './dto/update-loanee.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,12 +15,10 @@ import PaginationQueryType from 'src/types/paginationQuery';
 
 @Injectable()
 export class LoaneesService {
-
   constructor(
     @InjectModel(Loanee.name)
     private loaneeModel: Model<Loanee>,
-  ) { }
-
+  ) {}
 
   async create(createLoaneeDto: CreateLoaneeDto, user: JwtPayload) {
     if (user.role !== 'admin') {
@@ -26,12 +30,14 @@ export class LoaneesService {
         createdBy: user._id,
       }).save();
     } catch (error: any) {
-      throw new HttpException(error.message ?? 'Something went wrong', error.status ?? HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error.message ?? 'Something went wrong',
+        error.status ?? HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async findAll(pagination: PaginationQueryType, user: JwtPayload) {
-
     const currentPage = pagination.page ?? 1;
     const resPerPage = pagination.resPerPage ?? 20;
     const skip = (currentPage - 1) * resPerPage;
@@ -45,18 +51,17 @@ export class LoaneesService {
         currentPage,
         resPerPage,
         docsCount,
-      }
+      };
     }
-    return new UnauthorizedException('Only admins can view all loanees')
-
+    return new UnauthorizedException('Only admins can view all loanees');
   }
 
   async findOne(id: string) {
-    const loanee = await this.loaneeModel.findOne({ customerIdNo: id }).exec()
+    const loanee = await this.loaneeModel.findOne({ customerIdNo: id }).exec();
     if (loanee._id) {
-      return loanee
+      return loanee;
     }
-    return new NotFoundException('Loanee not found')
+    return new NotFoundException('Loanee not found');
   }
 
   update(id: string, updateLoaneeDto: UpdateLoaneeDto) {
@@ -68,6 +73,5 @@ export class LoaneesService {
       throw new UnauthorizedException('Only admins can delete loanees');
     }
     return this.loaneeModel.findByIdAndDelete(id).exec();
-
   }
 }

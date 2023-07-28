@@ -19,7 +19,6 @@ export class CreateLoanDto {
   // @IsString()
   // customerPhone: string;
 
->>>>>>> 19c273c9986911843316fe5e347a85c413da2710
   @IsNotEmpty()
   @IsString()
   currency: string;

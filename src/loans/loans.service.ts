@@ -15,7 +15,7 @@ import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
 import { CreateLoaneeDto } from '../loanees/dto/create-loanee.dto';
-import { Loanee } from  '../loanees/entities/loanee.entity';
+import { Loanee } from '../loanees/entities/loanee.entity';
 import { Shop } from '../shops/schema/shop.schma';
 
 @Injectable()
@@ -41,34 +41,37 @@ export class LoansService {
         );
       }
 
-      if (this.shopModel.loanMoney <= createLoanDto.loanAmount) {
-        throw new UnauthorizedException('Customer cannot be creditted. insufficient loan capital')
-      } else {
-        const loan = new this.loanModel({
-          ...createLoanDto,
-          loanBalance: createLoanDto.loanAmount,
-          createdBy: user._id,
-          shop: user.shop,
-        });
-  
-        await this.loaneeModel
-          .findOneAndUpdate(
-            { customerIdNo },
-            { $inc: { totalBalance: createLoanDto.loanAmount } },
-            { new: true },
-          )
-          .exec();
-  
-        await this.shopModel
-            .findOneAndUpdate(
-              { _id: loan.shop },
-              { $inc: { loanMoney: -loan.loanAmount } },
-              { new: true },
-            )
-            .exec();
-  
-        return await loan.save();
-      }
+      // TODO: Deal with loan capital
+      // if (this.shopModel.loanMoney <= createLoanDto.loanAmount) {
+      //   throw new UnauthorizedException(
+      //     'Customer cannot be creditted. insufficient loan capital',
+      //   );
+      // } else {
+      const loan = new this.loanModel({
+        ...createLoanDto,
+        loanBalance: createLoanDto.loanAmount,
+        createdBy: user._id,
+        shop: user.shop,
+      });
+
+      await this.loaneeModel
+        .findOneAndUpdate(
+          { customerIdNo },
+          { $inc: { totalBalance: createLoanDto.loanAmount } },
+          { new: true },
+        )
+        .exec();
+
+      await this.shopModel
+        .findOneAndUpdate(
+          { _id: loan.shop },
+          { $inc: { loanMoney: -loan.loanAmount } },
+          { new: true },
+        )
+        .exec();
+
+      return await loan.save();
+      // }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
@@ -193,12 +196,12 @@ export class LoansService {
       );
 
       await this.shopModel
-      .findOneAndUpdate(
-        { _id: loan.shop },
-        { $inc: { loanMoney: updateLoanDTO.amountPaid } },
-        { new: true },
-      )
-      .exec();
+        .findOneAndUpdate(
+          { _id: loan.shop },
+          { $inc: { loanMoney: updateLoanDTO.amountPaid } },
+          { new: true },
+        )
+        .exec();
 
       return await this.loaneeModel
         .findOneAndUpdate(
