@@ -14,6 +14,9 @@ export class CurrencyConversion {
   @Prop({ required: true })
   initialAmount: number;
 
+  @Prop({ default: null })
+  additionalEntries: number[];
+
   @Prop({ required: true })
   finalAmount: number;
 
