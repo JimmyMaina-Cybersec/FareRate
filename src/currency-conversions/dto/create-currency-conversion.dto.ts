@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsOptional } from 'class-validator';
+import { IsNumber, IsString, IsOptional, IsArray } from 'class-validator';
 
 export class CreateCurrencyConversionDto {
   @IsString()
@@ -11,8 +11,8 @@ export class CreateCurrencyConversionDto {
   initialAmount: number;
 
   @IsOptional()
-  @IsNumber( { }, { each: true } )
-  additionalEntries?: number;
+  @IsArray()
+  additionalEntries?: number[];
 
   @IsNumber()
   finalAmount: number;
