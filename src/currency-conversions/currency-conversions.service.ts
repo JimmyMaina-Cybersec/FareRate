@@ -13,6 +13,7 @@ import {
 } from './schema/currency-conversion.schema';
 import { Connection, Model } from 'mongoose';
 import { Float, FloatDocument } from 'src/float/schma/float.schema';
+import PaginationQueryType from '../types/paginationQuery';
 
 @Injectable()
 export class CurrencyConversionsService {
@@ -98,24 +99,19 @@ export class CurrencyConversionsService {
     filters: {
       trasactionType?: string;
       createdBy?: string;
-      page?: number;
-      resPerPage?: number;
     },
+    paginationQuery: PaginationQueryType,
   ): Promise<{
     data: CurrencyConversionDocument[];
     page: number;
     resPerPage: number;
     numberOfPages: number;
   }> {
-    const currentPage = filters.page ?? 1;
-    const resPerPage = filters.resPerPage ?? 50;
+    const currentPage = paginationQuery.page ?? 1;
+    const resPerPage = paginationQuery.resPerPage ?? 50;
     const skip = (currentPage - 1) * resPerPage;
 
     if (user.role == 'admin' || user.role == 'super user') {
-      delete filters.page;
-      delete filters.resPerPage;
-      console.log(filters);
-
       const numberOfFloating =
         await this.currencyConversionModel.countDocuments({
           ...filters,

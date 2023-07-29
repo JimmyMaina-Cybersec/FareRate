@@ -54,10 +54,10 @@ export class LoaneesService {
       if (user.role === 'admin') {
         docsCount = await this.loaneeModel.countDocuments();
         return {
-          docs: await this.loaneeModel.find().skip(skip).limit(resPerPage),
+          data: await this.loaneeModel.find().skip(skip).limit(resPerPage),
           page: currentPage,
           resPerPage,
-          numOfPages: Math.ceil(docsCount / resPerPage),
+          numberOfPages: Math.ceil(docsCount / resPerPage),
         };
       }
       return new UnauthorizedException('Only admins can view all loanees');

@@ -81,6 +81,7 @@ export class LoansService {
     filters: {
       shop?: string;
       createdBy?: string;
+      loanee?: string;
     },
     paginationQuery: PaginationQueryType,
   ) {
@@ -104,7 +105,7 @@ export class LoansService {
             'createdBy',
             '-refreshToken -updatedAt -createdAt -createdBy -shop',
           )
-          .populate('installments', '-updatedAt -__v  -loan')
+          .populate('installments', '-updatedAt -__v')
           .limit(resPerPage)
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -118,7 +119,6 @@ export class LoansService {
       data: await this.loanModel
         .find({ createdBy: user._id })
         .limit(resPerPage)
-
         .sort({ createdAt: -1 })
         .skip(skip)
         .exec(),

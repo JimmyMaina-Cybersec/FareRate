@@ -4,6 +4,7 @@ import { CreateCurrencyConversionDto } from './dto/create-currency-conversion.dt
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import PaginationQueryType from '../types/paginationQuery';
 
 @UseGuards(JwtAuthGuard)
 @Controller('currency-conversions')
@@ -30,10 +31,9 @@ export class CurrencyConversionsController {
     filters: {
       trasactionType?: string;
       createdBy?: string;
-      page: number;
-      resPerPage: number;
     },
+    @Query() pagination: PaginationQueryType,
   ) {
-    return this.currencyConversionsService.findAll(user, filters);
+    return this.currencyConversionsService.findAll(user, filters, pagination);
   }
 }
