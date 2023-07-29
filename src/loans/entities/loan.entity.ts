@@ -2,10 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
 export type LoanDocument = HydratedDocument<Loan>;
+
 @Schema({ timestamps: true })
 export class Loan {
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'Loanee' })
-  customerIdNo: Types.ObjectId;
+  loanee: Types.ObjectId;
 
   @Prop({ required: true })
   loanAmount: number;
