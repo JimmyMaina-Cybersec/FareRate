@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { LoaneesService } from './loanees.service';
 import { CreateLoaneeDto } from './dto/create-loanee.dto';
 import { UpdateLoaneeDto } from './dto/update-loanee.dto';
@@ -7,19 +17,24 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import PaginationQueryType from 'src/types/paginationQuery';
 
-
 @UseGuards(JwtAuthGuard)
 @Controller('loanees')
 export class LoaneesController {
-  constructor(private readonly loaneesService: LoaneesService) { }
+  constructor(private readonly loaneesService: LoaneesService) {}
 
-  @Post('create')
-  create(@Body() createLoaneeDto: CreateLoaneeDto, @CurrentUser() user: JwtPayload) {
+  @Post('create-loanee')
+  create(
+    @Body() createLoaneeDto: CreateLoaneeDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.loaneesService.create(createLoaneeDto, user);
   }
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload, @Query() pagination: PaginationQueryType) {
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query() pagination: PaginationQueryType,
+  ) {
     return this.loaneesService.findAll(pagination, user);
   }
 
