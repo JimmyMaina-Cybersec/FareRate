@@ -21,14 +21,19 @@ export class LoaneesService {
   ) {}
 
   async create(createLoaneeDto: CreateLoaneeDto, user: JwtPayload) {
+    console.log(user);
     if (user.role !== 'admin') {
       throw new UnauthorizedException('Only admins can create loanees');
     }
+
     try {
-      return await new this.loaneeModel({
+      console.log(user);
+      const loanee = new this.loaneeModel({
         ...createLoaneeDto,
         createdBy: user._id,
-      }).save();
+      });
+
+      return await loanee.save();
     } catch (error: any) {
       throw new HttpException(
         error.message ?? 'Something went wrong',
@@ -38,22 +43,30 @@ export class LoaneesService {
   }
 
   async findAll(pagination: PaginationQueryType, user: JwtPayload) {
-    const currentPage = pagination.page ?? 1;
-    const resPerPage = pagination.resPerPage ?? 20;
-    const skip = (currentPage - 1) * resPerPage;
+    try {
+      const currentPage = pagination.page ?? 1;
+      const resPerPage = pagination.resPerPage ?? 20;
+      const skip = (currentPage - 1) * resPerPage;
 
-    let docsCount = 0;
+      let docsCount = 0;
+      console.log(user);
 
-    if (user.role === 'admin') {
-      docsCount = await this.loaneeModel.countDocuments();
-      return {
-        docs: this.loaneeModel.find().skip(skip).limit(resPerPage),
-        currentPage,
-        resPerPage,
-        docsCount,
-      };
+      if (user.role === 'admin') {
+        docsCount = await this.loaneeModel.countDocuments();
+        return {
+          docs: await this.loaneeModel.find().skip(skip).limit(resPerPage),
+          page: currentPage,
+          resPerPage,
+          numOfPages: Math.ceil(docsCount / resPerPage),
+        };
+      }
+      return new UnauthorizedException('Only admins can view all loanees');
+    } catch (error: any) {
+      throw new HttpException(
+        error.message ?? 'Something went wrong',
+        error.status ?? HttpStatus.BAD_REQUEST,
+      );
     }
-    return new UnauthorizedException('Only admins can view all loanees');
   }
 
   async findOne(id: string) {

@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,7 +13,6 @@ import { Installment } from './entities/installment.entity';
 import { JwtPayload } from 'src/types/jwt-payload';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import PaginationQueryType from '../types/paginationQuery';
-import { CreateLoaneeDto } from '../loanees/dto/create-loanee.dto';
 import { Loanee } from '../loanees/entities/loanee.entity';
 import { Shop } from '../shops/schema/shop.schma';
 
@@ -33,10 +31,10 @@ export class LoansService {
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
-      const { customerIdNo } = createLoanDto;
-      const customer = await this.loaneeModel.findOne({ customerIdNo });
+      const { loanee } = createLoanDto;
+      const customer = await this.loaneeModel.findOne({ loanee: loanee });
       if (!customer) {
-        throw new NotFoundException(
+        return new NotFoundException(
           'Loans are offered to registered customers',
         );
       }
@@ -44,7 +42,7 @@ export class LoansService {
       // TODO: Deal with loan capital
       // if (this.shopModel.loanMoney <= createLoanDto.loanAmount) {
       //   throw new UnauthorizedException(
-      //     'Customer cannot be creditted. insufficient loan capital',
+      //     'Customer cannot be credited. insufficient loan capital',
       //   );
       // } else {
       const loan = new this.loanModel({
@@ -56,41 +54,23 @@ export class LoansService {
 
       await this.loaneeModel
         .findOneAndUpdate(
-          { customerIdNo },
+          { loanee: loanee },
           { $inc: { totalBalance: createLoanDto.loanAmount } },
           { new: true },
         )
         .exec();
 
-      await this.shopModel
-        .findOneAndUpdate(
-          { _id: loan.shop },
-          { $inc: { loanMoney: -loan.loanAmount } },
-          { new: true },
-        )
-        .exec();
+      // TODO: all loans have a currency
+      // await this.shopModel
+      //   .findOneAndUpdate(
+      //     { _id: loan.shop },
+      //     { $inc: { loanMoney: -loan.loanAmount } },
+      //     { new: true },
+      //   )
+      //   .exec();
 
       return await loan.save();
       // }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async createLoanee(createLoaneeDto: CreateLoaneeDto, user: JwtPayload) {
-    try {
-      if (user.role != 'admin') {
-        throw new UnauthorizedException(
-          'You are not authorized to register loanees',
-        );
-      }
-
-      const loanee = new this.loaneeModel({
-        ...createLoaneeDto,
-        createdBy: user._id,
-      });
-
-      return await loanee.save();
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
@@ -149,11 +129,9 @@ export class LoansService {
   }
 
   async findPendingLoansByIdNo(idNo: string) {
-    const loans = await this.loanModel.find({ customerIdNo: idNo }).exec();
+    const loans = await this.loanModel.find({ customer: idNo }).exec();
     if (loans.length === 0) {
-      throw new NotFoundException(
-        `No loans found for this user with ID No. ${idNo}`,
-      );
+      throw new NotFoundException(`No loans found for this Loanee`);
     }
     return loans;
   }
@@ -167,7 +145,7 @@ export class LoansService {
       }
 
       if (updateLoanDTO.amountPaid > loan.loanBalance) {
-        throw new ConflictException(
+        return new ConflictException(
           `Amount to be paid exceeds remaining debt ${loan.loanBalance}`,
         );
       }
@@ -195,17 +173,18 @@ export class LoansService {
         { new: true },
       );
 
-      await this.shopModel
-        .findOneAndUpdate(
-          { _id: loan.shop },
-          { $inc: { loanMoney: updateLoanDTO.amountPaid } },
-          { new: true },
-        )
-        .exec();
+      // TODO: Deal with loan capital and capital currency
+      // await this.shopModel
+      //   .findOneAndUpdate(
+      //     { _id: loan.shop },
+      //     { $inc: { loanMoney: updateLoanDTO.amountPaid } },
+      //     { new: true },
+      //   )
+      //   .exec();
 
       return await this.loaneeModel
-        .findOneAndUpdate(
-          { customerIdNo: loan.customerIdNo },
+        .findByIdAndUpdate(
+          loan.loanee,
           { $inc: { totalBalance: -updateLoanDTO.amountPaid } },
           { new: true },
         )
