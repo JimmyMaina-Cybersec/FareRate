@@ -29,8 +29,10 @@ export class CurrencyConversionsController {
     @CurrentUser() user: JwtPayload,
     @Query()
     filters: {
-      trasactionType?: string;
+      transactionType?: string;
       createdBy?: string;
+      page?: number;
+      resPerPage?: number;
     },
     @Query() pagination: PaginationQueryType,
   ) {

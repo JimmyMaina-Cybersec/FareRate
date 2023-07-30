@@ -97,8 +97,10 @@ export class CurrencyConversionsService {
   async findAll(
     user: JwtPayload,
     filters: {
-      trasactionType?: string;
+      transactionType?: string;
       createdBy?: string;
+      page?: number;
+      resPerPage?: number;
     },
     paginationQuery: PaginationQueryType,
   ): Promise<{
@@ -112,13 +114,13 @@ export class CurrencyConversionsService {
     const skip = (currentPage - 1) * resPerPage;
 
     if (user.role == 'admin' || user.role == 'super user') {
+      delete filters.page;
+      delete filters.resPerPage;
+
       const numberOfFloating =
         await this.currencyConversionModel.countDocuments({
           ...filters,
         });
-      if (numberOfFloating <= 0) {
-        throw new HttpException('No users found', HttpStatus.NOT_FOUND);
-      }
 
       const numberOfPages = Math.ceil(numberOfFloating / resPerPage);
 
