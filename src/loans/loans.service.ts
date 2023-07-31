@@ -32,9 +32,10 @@ export class LoansService {
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
       const { loanee } = createLoanDto;
-      const customer = await this.loaneeModel.findOne({ loanee: loanee });
+      const customer = await this.loaneeModel.exists({ _id: loanee });
+
       if (!customer) {
-        return new NotFoundException(
+        throw new NotFoundException(
           'Loans are offered to registered customers',
         );
       }
@@ -50,7 +51,7 @@ export class LoansService {
         loanBalance: createLoanDto.loanAmount,
         createdBy: user._id,
         shop: user.shop,
-      });
+      }).save();
 
       await this.loaneeModel
         .findOneAndUpdate(
@@ -69,7 +70,7 @@ export class LoansService {
       //   )
       //   .exec();
 
-      return await loan.save();
+      return await loan;
       // }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
