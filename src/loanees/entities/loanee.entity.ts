@@ -26,6 +26,9 @@ export class Loanee {
   @Prop({ required: true })
   IdPhotoURL: string;
 
+  @Prop({ default: null })
+  status: string;
+
   @Prop({ type: SchemaTypes.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 }

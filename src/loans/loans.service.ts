@@ -54,11 +54,7 @@ export class LoansService {
       }).save();
 
       await this.loaneeModel
-        .findOneAndUpdate(
-          { loanee: loanee },
-          { $inc: { totalBalance: createLoanDto.loanAmount } },
-          { new: true },
-        )
+        .findOneAndUpdate({ _id: loanee }, { status: 'unpaid' }, { new: true })
         .exec();
 
       // TODO: all loans have a currency
@@ -164,6 +160,7 @@ export class LoansService {
       } else {
         loan.status = 'partially paid';
       }
+
       await this.loanModel.findByIdAndUpdate(
         loanId,
         {
@@ -173,6 +170,18 @@ export class LoansService {
         },
         { new: true },
       );
+
+      // find all unpaid  and partially paid loans
+      const unpaidLoans = await this.loanModel
+        .find({ loanee: loan.loanee, status: { $ne: 'paid' } })
+        .exec();
+
+      // if there are no unpaid loans, update loanee status to paid
+      if (unpaidLoans.length === 0) {
+        await this.loaneeModel
+          .findByIdAndUpdate(loan.loanee, { status: 'paid' }, { new: true })
+          .exec();
+      }
 
       // TODO: Deal with loan capital and capital currency
       // await this.shopModel

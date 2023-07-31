@@ -18,12 +18,23 @@ export class MobileMoneyService {
     private mobileMoneyModel: Model<MobileMoney>,
   ) {}
 
-  create(createMobileMoneyDto: CreateMobileMoneyDto, user: JwtPayload) {
+  async create(createMobileMoneyDto: CreateMobileMoneyDto, user: JwtPayload) {
     if (user.role !== 'admin') {
       throw new ForbiddenException('Only admins can create mobile money');
     }
 
-    return this.mobileMoneyModel.create({
+    const mob = await this.mobileMoneyModel.find({
+      status: 'open',
+      provider: createMobileMoneyDto.provider,
+    });
+
+    if (mob) {
+      throw new ForbiddenException(
+        'Mobile money already open for this provider',
+      );
+    }
+
+    return await this.mobileMoneyModel.create({
       ...createMobileMoneyDto,
       assingnedBy: user._id,
       shop: user.shop,
@@ -59,6 +70,7 @@ export class MobileMoneyService {
       return {
         data: await this.mobileMoneyModel
           .find({ ...adminFilters })
+          .populate('agent', 'shop', 'provider')
           .sort({ createdAt: -1 })
           .select('-__v')
           .limit(resPerPage)
