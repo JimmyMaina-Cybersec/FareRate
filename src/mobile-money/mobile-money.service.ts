@@ -66,11 +66,12 @@ export class MobileMoneyService {
       const numberOfFloating = await this.mobileMoneyModel.countDocuments({
         ...adminFilters,
       });
-      console.log('numberOfFloating' + numberOfFloating);
       return {
         data: await this.mobileMoneyModel
           .find({ ...adminFilters })
-          .populate('agent', 'shop', 'provider')
+          .populate('agent', ['firstName', 'lastName', 'phone', '_id', 'shop'])
+          .populate('provider', ['name', '_id'])
+          .populate('shop', ['name', '_id'])
           .sort({ createdAt: -1 })
           .select('-__v')
           .limit(resPerPage)
@@ -78,7 +79,7 @@ export class MobileMoneyService {
           .exec(),
 
         page: paginationQuery.page ?? 1,
-        resPerPage: paginationQuery.resPerPage ?? 20,
+        resPerPage: paginationQuery.resPerPage ?? 50,
         numberOfPages: Math.ceil(numberOfFloating / resPerPage),
       };
     }
@@ -97,7 +98,7 @@ export class MobileMoneyService {
         .exec(),
 
       page: paginationQuery.page ?? 1,
-      resPerPage: paginationQuery.resPerPage ?? 20,
+      resPerPage: paginationQuery.resPerPage ?? 50,
       numberOfPages: Math.ceil(numberOfFloating / resPerPage),
     };
   }
@@ -106,20 +107,53 @@ export class MobileMoneyService {
     return this.mobileMoneyModel.findById(id);
   }
 
-  update(
+  async update(
     id: string,
     updateMobileMoneyDto: UpdateMobileMoneyDto,
     user: JwtPayload,
   ) {
     if (user.role == 'admin') {
-      return this.mobileMoneyModel.findByIdAndUpdate(
-        id,
-        {
-          status: updateMobileMoneyDto.status,
-          closingAmount: updateMobileMoneyDto.amount,
-        },
-        { new: true },
-      );
+      const mobileMoney = await this.mobileMoneyModel.findById(id);
+
+      if (user._id == mobileMoney.agent) {
+        return this.mobileMoneyModel.findByIdAndUpdate(
+          id,
+          {
+            status: 'approved',
+            closingAmount: updateMobileMoneyDto.amount,
+          },
+          { new: true },
+        );
+      }
+
+      if (mobileMoney.agentClosingAmount == updateMobileMoneyDto.amount) {
+        return this.mobileMoneyModel.findByIdAndUpdate(
+          id,
+          {
+            status: 'approved',
+            closingAmount: updateMobileMoneyDto.amount,
+          },
+          { new: true },
+        );
+      } else {
+        return this.mobileMoneyModel.findByIdAndUpdate(
+          id,
+          {
+            status: 'declined',
+            closingAmount: updateMobileMoneyDto.amount,
+          },
+          { new: true },
+        );
+      }
+
+      // return this.mobileMoneyModel.findByIdAndUpdate(
+      //   id,
+      //   {
+      //     status: updateMobileMoneyDto.status,
+      //     closingAmount: updateMobileMoneyDto.amount,
+      //   },
+      //   { new: true },
+      // );
     }
     return this.mobileMoneyModel.findByIdAndUpdate(
       id,

@@ -3,10 +3,7 @@ import { CreateMobileMoneyDto } from './create-mobile-money.dto';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class UpdateMobileMoneyDto {
-    @IsNumber()
-    @IsNotEmpty()
-    amount: number;
-
-    @IsString()
-    status: string
+  @IsNumber()
+  @IsNotEmpty()
+  amount: number;
 }
