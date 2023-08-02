@@ -28,7 +28,7 @@ export class MobileMoneyService {
       throw new ForbiddenException('Only admins can create mobile money');
     }
 
-    const mob = await this.mobileMoneyModel.find({
+    const mob = await this.mobileMoneyModel.exists({
       status: 'open',
       provider: createMobileMoneyDto.provider,
     });
