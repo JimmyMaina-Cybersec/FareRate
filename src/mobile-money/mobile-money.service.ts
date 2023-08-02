@@ -1,5 +1,8 @@
 import {
+  BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,13 +13,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MobileMoney } from './entities/mobile-money.entity';
 import PaginationQueryType from 'src/types/paginationQuery';
+import { ReviewDTO } from './dto/review.dto';
 
 @Injectable()
 export class MobileMoneyService {
+
   constructor(
     @InjectModel(MobileMoney.name)
     private mobileMoneyModel: Model<MobileMoney>,
-  ) {}
+  ) { }
 
   async create(createMobileMoneyDto: CreateMobileMoneyDto, user: JwtPayload) {
     if (user.role !== 'admin') {
@@ -51,11 +56,6 @@ export class MobileMoneyService {
       _id?: string;
       provider?: string;
     },
-    agentFilters: {
-      status?: string;
-      _id?: string;
-      provider?: string;
-    },
     paginationQuery: PaginationQueryType,
   ) {
     const currentPage = paginationQuery.page ?? 1;
@@ -70,7 +70,7 @@ export class MobileMoneyService {
         data: await this.mobileMoneyModel
           .find({ ...adminFilters })
           .populate('agent', ['firstName', 'lastName', 'phone', '_id', 'shop'])
-          .populate('provider', ['name', '_id'])
+          .populate('provider')
           .populate('shop', ['name', '_id'])
           .sort({ createdAt: -1 })
           .select('-__v')
@@ -84,24 +84,84 @@ export class MobileMoneyService {
       };
     }
 
-    const numberOfFloating = await this.mobileMoneyModel.countDocuments({
-      agent: user._id,
-      ...agentFilters,
-    });
-    return {
-      data: await this.mobileMoneyModel
-        .find({ ...agentFilters, agent: user._id })
-        .sort({ createdAt: -1 })
-        .select('-__v')
-        .limit(resPerPage)
-        .skip(skip)
-        .exec(),
-
-      page: paginationQuery.page ?? 1,
-      resPerPage: paginationQuery.resPerPage ?? 50,
-      numberOfPages: Math.ceil(numberOfFloating / resPerPage),
-    };
+    throw new UnauthorizedException('Only admins can view all mobile money');
   }
+
+
+  async findMine(
+    user: JwtPayload,
+    filters: {
+      status?: string;
+      provider?: string;
+    },
+  ) {
+    return await this.mobileMoneyModel.find({ ...filters, agent: user._id })
+      .sort({ createdAt: -1 })
+      .select('-__v').limit(50)
+      .exec()
+  }
+
+
+  async submitForReview(id: string, updateMobileMoneyDto: UpdateMobileMoneyDto, user: JwtPayload) {
+
+    const float = await this.mobileMoneyModel.findOne({ _id: id, agent: user._id });
+
+    if (!float) {
+      throw new ForbiddenException('Mobile money not found');
+    }
+
+    if (float.status !== 'open') {
+      throw new ForbiddenException('Mobile money already submitted for review');
+    }
+    return float.updateOne({
+      status: 'awaiting approval',
+      agentClosingAmount: updateMobileMoneyDto.amount,
+      agentClosedAt: new Date(),
+    }, {
+      new: true
+    }).exec();
+  }
+
+
+  async review(id: string, reviewDTO: ReviewDTO, user: JwtPayload) {
+    if (user.role !== 'admin') {
+      throw new ForbiddenException('Only admins can review mobile money');
+    }
+
+    const float = await this.mobileMoneyModel.findById(id);
+
+    if (!float) {
+      throw new ForbiddenException('Mobile money not found');
+    }
+    if (!float.agentClosingAmount) {
+      throw new ForbiddenException('Agent closing amount not set');
+    }
+
+    if (float.status == 'closed') {
+      throw new ForbiddenException('Mobile money already closed');
+    }
+
+    if (reviewDTO.approve) {
+      return await float.updateOne({
+        status: 'closed',
+        closingAmount: float.agentClosingAmount,
+        closedAt: new Date(),
+      }, {
+        new: true
+      }).exec();
+    }
+
+    return await float.updateOne({
+      status: 'declined',
+      closingAmount: float.agentClosingAmount,
+      closedAt: new Date(),
+    }, {
+      new: true
+    }).exec();
+
+  }
+
+
 
   findOne(id: string) {
     return this.mobileMoneyModel.findById(id);
@@ -145,15 +205,6 @@ export class MobileMoneyService {
           { new: true },
         );
       }
-
-      // return this.mobileMoneyModel.findByIdAndUpdate(
-      //   id,
-      //   {
-      //     status: updateMobileMoneyDto.status,
-      //     closingAmount: updateMobileMoneyDto.amount,
-      //   },
-      //   { new: true },
-      // );
     }
     return this.mobileMoneyModel.findByIdAndUpdate(
       id,
@@ -167,12 +218,9 @@ export class MobileMoneyService {
     );
   }
 
-  remove(id: string, user: JwtPayload) {
+  async remove(id: string, user: JwtPayload) {
     if (user.role !== 'admin')
       return new UnauthorizedException('Onli Admins can delete this service');
-    this.mobileMoneyModel.findByIdAndDelete().exec();
-    return {
-      message: 'deleted Successfully',
-    };
+    return await this.mobileMoneyModel.findByIdAndDelete(id).exec();
   }
 }
