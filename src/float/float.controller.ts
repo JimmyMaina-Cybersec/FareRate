@@ -16,11 +16,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import PaginationQueryType from 'src/types/paginationQuery';
+import { ShifFloatDto } from './dto/shiftFloat.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('float')
 export class FloatController {
-  constructor(private readonly floatService: FloatService) {}
+  constructor(private readonly floatService: FloatService) { }
 
   @Post('create')
   create(
@@ -60,5 +61,13 @@ export class FloatController {
   @Delete('delete/:id')
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.floatService.remove(id, user);
+  }
+
+
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  @Post('shift-float')
+  shiftFloat(@CurrentUser() user: JwtPayload, @Body() shiftFloatDto: ShifFloatDto) {
+    return this.floatService.shiftFloat(user, shiftFloatDto);
   }
 }
