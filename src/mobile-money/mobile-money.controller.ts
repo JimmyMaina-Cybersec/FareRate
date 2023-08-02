@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtPayload } from 'src/types/jwt-payload';
 import PaginationQueryType from 'src/types/paginationQuery';
+import { ReviewDTO } from './dto/review.dto';
 
 
 @UseGuards(JwtAuthGuard)
@@ -38,10 +39,37 @@ export class MobileMoneyController {
     return this.mobileMoneyService.findAll(
       user,
       adminFilters,
-      agentFilters,
       paginationQuery
     );
   }
+
+  @Get('/my-float')
+  findMine(
+    @Query() filters: {
+      status?: string;
+      provider?: string;
+    },
+    @CurrentUser() user: JwtPayload
+
+  ) {
+    return this.mobileMoneyService.findMine(
+      user,
+      filters,
+
+    );
+  }
+
+
+  @Patch('my-float/review/:id')
+  submitForReview(@Param('id') id: string, @Body() updateMobileMoneyDto: UpdateMobileMoneyDto, @CurrentUser() user: JwtPayload) {
+    return this.mobileMoneyService.submitForReview(id, updateMobileMoneyDto, user);
+  }
+
+  @Patch('review/:id')
+  review(@Param('id') id: string, @Body() reviewDTO: ReviewDTO, @CurrentUser() user: JwtPayload) {
+    return this.mobileMoneyService.review(id, reviewDTO, user);
+  }
+
 
   @Get('provider/:id')
   findOne(@Param('id') id: string) {
