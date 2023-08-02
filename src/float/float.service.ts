@@ -13,13 +13,14 @@ import { Model } from 'mongoose';
 import { Float } from './entities/float.entity';
 import { FloatDocument } from './schma/float.schema';
 import PaginationQueryType from 'src/types/paginationQuery';
+import { ShifFloatDto } from './dto/shiftFloat.dto';
 
 @Injectable()
 export class FloatService {
   constructor(
     @InjectModel(Float.name)
     private readonly floatModel: Model<FloatDocument>,
-  ) {}
+  ) { }
 
   async create(
     createFloatDto: CreateFloatDto,
@@ -92,7 +93,7 @@ export class FloatService {
     if (user.role == 'admin' || user.role == 'service agent') {
       const currentFloat = await this.floatModel.findById(id).exec();
       if (currentFloat.status != 'active') {
-        throw new HttpException('Float is not active', HttpStatus.BAD_REQUEST);
+        throw new HttpException('Float is not active', HttpStatus.FORBIDDEN);
       }
       return currentFloat
         .updateOne(
@@ -140,5 +141,98 @@ export class FloatService {
     throw new UnauthorizedException(
       'You are not authorized to perform this action',
     );
+  }
+
+  async shiftFloat(user: JwtPayload, shiftFloatDTO: ShifFloatDto) {
+    if (user.role != 'admin') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this action',
+      );
+    }
+
+    const openFloatsOnNewServiceAgentExist = await this.floatModel.exists({
+      status: 'active',
+      serviceAgent: shiftFloatDTO.agentStartingShift,
+    }).exec();
+
+    if (openFloatsOnNewServiceAgentExist) {
+      throw new ConflictException(
+        'There are open floats on the new service agent',
+      );
+    }
+
+
+
+    const openFloatsOnOldServiceAgentExist = await this.floatModel.exists({
+      status: 'active',
+      serviceAgent: shiftFloatDTO.agentEndingShift,
+    }).exec();
+
+    if (!openFloatsOnOldServiceAgentExist) {
+      throw new ConflictException(
+        'There are no open floats on the old service agent',
+      );
+    }
+
+    const oldFloats = await this.floatModel
+      .find({
+        status: 'active',
+        serviceAgent: shiftFloatDTO.agentEndingShift,
+      }).exec();
+    // 
+    // create new float for the new service agent
+    // close the old float
+
+    const newFloats = oldFloats.map((float) => {
+      return {
+        ...float,
+        status: 'active',
+        initialmount: float.currentAmount,
+        addedAmount: 0,
+        _id: null,
+        serviceAgent: shiftFloatDTO.agentStartingShift,
+        createdBy: user._id,
+        createdAt: new Date(),
+        updatedBy: user._id,
+        updatedAt: new Date(),
+      };
+    }
+
+    );
+
+    const closedFloats = oldFloats.map((float) => {
+      return {
+        ...float,
+        status: 'closed',
+        closedBy: user._id,
+        closedAt: new Date(),
+      };
+    }
+
+    );
+
+    const newFloatsCreated = await this.floatModel.insertMany(newFloats);
+    const oldFloatsClosed = await this.floatModel.updateMany(
+      {
+        status: 'active',
+        serviceAgent: shiftFloatDTO.agentEndingShift,
+      },
+      {
+        status: 'closed',
+        closedBy: user._id,
+        closedAt: new Date(),
+      },
+      { new: true },
+    ).exec();
+
+    return {
+      newFloatsCreated,
+      oldFloatsClosed,
+    };
+
+
+
+
+
   }
 }
