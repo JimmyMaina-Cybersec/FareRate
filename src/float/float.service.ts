@@ -184,12 +184,14 @@ export class FloatService {
     // close the old float
 
     const newFloats = oldFloats.map((float) => {
+      delete float._id;
       return {
         ...float,
         status: 'active',
         initialmount: float.currentAmount,
+        currency: float.currency,
+        currentAmount: float.currentAmount,
         addedAmount: 0,
-        _id: null,
         serviceAgent: shiftFloatDTO.agentStartingShift,
         createdBy: user._id,
         createdAt: new Date(),
@@ -200,16 +202,17 @@ export class FloatService {
 
     );
 
-    const closedFloats = oldFloats.map((float) => {
-      return {
-        ...float,
-        status: 'closed',
-        closedBy: user._id,
-        closedAt: new Date(),
-      };
-    }
+    // ! code cant be explained
+    // const closedFloats = oldFloats.map((float) => {
+    //   return {
+    //     ...float,
+    //     status: 'closed',
+    //     closedBy: user._id,
+    //     closedAt: new Date(),
+    //   };
+    // }
 
-    );
+    // );
 
     const newFloatsCreated = await this.floatModel.insertMany(newFloats);
     const oldFloatsClosed = await this.floatModel.updateMany(
