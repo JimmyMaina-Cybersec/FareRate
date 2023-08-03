@@ -98,6 +98,8 @@ export class MobileMoneyService {
   ) {
     return await this.mobileMoneyModel.find({ ...filters, agent: user._id })
       .sort({ createdAt: -1 })
+      .populate('provider')
+      .populate('shop', ['name', '_id'])
       .select('-__v').limit(50)
       .exec()
   }
