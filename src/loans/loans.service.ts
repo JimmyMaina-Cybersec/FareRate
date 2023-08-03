@@ -211,6 +211,8 @@ export class LoansService {
 
 
   findLoanInstalments(loanID: string) {
-    return this.installmentModel.find({ loan: loanID }).populate('user').exec();
+    return this.installmentModel.find({ loan: loanID }).populate('user').sort(
+      { createdAt: -1 },
+    ).exec();
   }
 }
