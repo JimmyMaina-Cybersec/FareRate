@@ -18,6 +18,7 @@ import { Shop } from '../shops/schema/shop.schma';
 
 @Injectable()
 export class LoansService {
+
   constructor(
     @InjectModel(Loan.name)
     private loanModel: Model<Loan>,
@@ -27,7 +28,7 @@ export class LoansService {
     private loaneeModel: Model<Loanee>,
     @InjectModel(Shop.name)
     private shopModel: Model<Shop>,
-  ) {}
+  ) { }
 
   async create(createLoanDto: CreateLoanDto, user: JwtPayload) {
     try {
@@ -206,5 +207,10 @@ export class LoansService {
         error.status ?? HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+
+  findLoanInstalments(loanID: string) {
+    return this.installmentModel.find({ loan: loanID }).exec();
   }
 }

@@ -19,7 +19,7 @@ import PaginationQueryType from '../types/paginationQuery';
 @UseGuards(JwtAuthGuard)
 @Controller('loans')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) {}
+  constructor(private readonly loansService: LoansService) { }
 
   @Post('new-loan')
   create(
@@ -45,6 +45,12 @@ export class LoansController {
   @Get(':idNo')
   findPendingLoansByIdNo(@Param('idNo') idNo: string) {
     return this.loansService.findPendingLoansByIdNo(idNo);
+  }
+
+
+  @Get('instalments/:loanID')
+  findLoanInstalments(@Param('loanID') loanID: string) {
+    return this.loansService.findLoanInstalments(loanID);
   }
 
   @Patch('pay/:id')
