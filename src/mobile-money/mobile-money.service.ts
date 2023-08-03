@@ -31,6 +31,7 @@ export class MobileMoneyService {
     const mob = await this.mobileMoneyModel.exists({
       status: 'open',
       provider: createMobileMoneyDto.provider,
+      agent: createMobileMoneyDto.agent,
     });
 
     if (mob) {
